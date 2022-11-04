@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.245">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Howard Baek">
+<meta name="dcterms.date" content="2019-01-07">
+<meta name="description" content="From a casual fan perspective, the intensity traditionally ramps up in the playoffs because teams are closer to the grand prize, the Stanley Cup.">
+
+<title>Howard Baek - Quantifying Differences between the Regular Season and Playoffs using Survival Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Howard Baek</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/howardbaek"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/howard_baek"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Quantifying Differences between the Regular Season and Playoffs using Survival Analysis</h1>
+                  <div>
+        <div class="description">
+          From a casual fan perspective, the intensity traditionally ramps up in the playoffs because teams are closer to the grand prize, the Stanley Cup.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Data Analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Howard Baek </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 7, 2019</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p align="center">
+<img src="img/intro.gif" class="img-fluid">
+</p>
+<p>From a casual fan’s perspective, the intensity traditionally ramps up in the playoffs because teams are closer to the grand prize, the Stanley Cup. Fans are hyped up by the storylines and rivalries for every series, and so each event feels all the more momentous. So, how different are the rates of goals, shots, or hits from the regular season to the playoffs? Does the fact that a game is played during the playoffs change these rates significantly? Which rates don’t change that much?</p>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<p>The rates of events such as goals or shots follow a Poisson process, which counts the rate of events happening in a certain time period, such as a day or a week. One of the key assumptions of Poisson processes is that interarrival times, the time between events, follow an exponential distribution. Some real world examples of Poisson processes include number of car accidents in an area or the requests on a web server.</p>
+<p>Since Poisson processes do not account for the event not occuring in the duration of a game (ex.A 2-0 game where the losing team doesn’t score), I pivoted my focus to survival analysis. According to this <a href="https://stats.stackexchange.com/questions/44046/what-are-the-differences-between-survival-analysis-and-poisson-regression">Cross Validated post</a>, in survival analysis, the response variable is the time that has elapsed between events. Importantly, survival analysis deals with censoring-we might have incomplete information where the event of interest doesn’t occur in the duration of the game. I consider the treatment variable to be whether the game is played during the regular season or the playoffs. Also, I account for different situations in the game: 5-on-5 and power play (PP) situations. PP includes both 5 on 4 and 5 on 3 situations and accounts for roughly 25% of the time in my dataset. 5-on-5 situations make up 48% of the data.</p>
+<section id="cox-proportional-hazards-model-and-hazard-ratio" class="level3">
+<h3 class="anchored" data-anchor-id="cox-proportional-hazards-model-and-hazard-ratio">Cox Proportional Hazards Model and Hazard Ratio</h3>
+<ul>
+<li>Cox Proportional Hazards Model is a popular regression technique in Survival Analysis, where the measure of interest is hazard ratios.</li>
+<li>A hazard ratio <em>greater than one</em> indicates that as we move from the regular season to the playoffs, there is <em>an increase</em> in the event of interest.</li>
+<li>A hazard ratio <em>smaller than one</em> indicates that as we move from the regular season to the playoffs, there is <em>a decrease</em> in the event of interest.</li>
+<li>The article contains scatterplots of hazard ratios by event types that contain horizontal lines at a hazard ratio of 1, which signifies a <em>constant rate between the regular season and playoffs.</em></li>
+<li>If the confidence intervals for hazard ratios include 1.0, <em>the difference between the regular season and the playoffs is not significant.</em></li>
+</ul>
+</section>
+<section id="survival-curves" class="level3">
+<h3 class="anchored" data-anchor-id="survival-curves">Survival Curves</h3>
+<p align="center">
+<img src="img/survival-curve-sample.png" width="300" height="200">
+</p>
+<ul>
+<li>The survival curve is another visualization that shows the difference in rates between regular season and playoffs, but the curve uses a log-rank test to see if the difference is significant.</li>
+<li>I think of the relationship between the plots of hazard ratios and survival curves using a log-rank test as similar to that between confidence intervals (a.k.a hazard ratios) and hypothesis testing (a.k.a log-rank test). A one-to-one correspondence.</li>
+<li>The graphs display two curves, one for playoffs and the other for the regular season.</li>
+<li>In our graphs, the x-axis shows time during the game and the y-axis represents survival probability, which is the probability of our event <em>not occuring.</em></li>
+<li>For example, if our event is goals, the survival probability equals the probability of <em>not scoring.</em> As a result, the lower curve signifies higher rate of event.</li>
+<li>If a curve decreases faster (curve is steeper), that means we are more likely to observe the event of interest in the early stages of a game.</li>
+</ul>
+</section>
+<section id="tools-and-resources" class="level3">
+<h3 class="anchored" data-anchor-id="tools-and-resources">Tools and Resources</h3>
+<p>My main tool for organizing the data is the <a href="https://www.tidyverse.org/">tidyverse</a>, an opinionated collection of R packages that share an underlying design philosophy, grammar, and data structures. For the survival analysis, I used additional R packages, including <code>survival</code>, <code>survminer</code>, <code>ggfortify</code>, and <code>rms</code>.</p>
+<p>For additional research into the theory behind Survival Analysis, have a look at this <a href="http://dustintran.com/blog/survival-analysis-counting-processes-and-cox-models">blog post</a> by Dustin Tran, research scientist at Google Brain. For a tutorial of Survival Analysis in R, click <a href="http://www.sthda.com/english/wiki/survival-analysis-basics">here</a>. Alboukadel is the author of the survminer R package, which analyzes and draws patient’s survival curves.</p>
+</section>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p><img src="img/pbp-sample.png" width="600" height="200"></p>
+<p>I will be using Play by Play (PBP) data from 2007-2008 to 2017-2018 NHL seasons provided by Emmanuel Perry, creator of Corsica Hockey. The dataset contains 56 variables and over 13 million rows. Noteworthy variables I’ll be using for my analysis include Session (P for Playoffs and R for Regular Season), Event Type(Goals, Hits, Blocked Shots, Penalties, etc), Game Strength State (5v5, 4v5, 5v4, etc), and Game Seconds (Time of event during game in seconds).</p>
+<p><img src="img/survival-data-sample.png" width="600" height="200"></p>
+<p>I wrangled the data into a format for survival analysis. Again, <code>Session</code> describes whether game was held during regular season(R) or playoffs(P). <code>Event Type</code> specifies whether event of interest (in this case, goals) happened (1). A value of 0 for <code>Event Type</code> refers to the end of the game. <code>Time Difference</code> is the survival time in minutes, or in this case the time intervals between goals.</p>
+</section>
+<section id="plot-of-hazard-ratios" class="level2">
+<h2 class="anchored" data-anchor-id="plot-of-hazard-ratios">Plot of Hazard Ratios</h2>
+<p><img src="img/hazard-ratio-5v5.png" width="600" height="400"></p>
+<p>First, let’s look at the results for goals. The hazard ratio is 0.910, meaning that <em>as we move from regular season to the playoffs, goals decrease by approximately 9 percent in 5-on-5 situations</em>. This matches what prior work has shown: a <a href="https://www.theglobeandmail.com/sports/hockey/globe-on-hockey/round-2-when-the-goals-go-away-in-the-nhl-playoffs/article18583679/">Globe and Mail piece</a> by James Mirtle reveals that the number of shots on goal, shot attempts and the amount of time spent on the power play are similar between the regular season and playoffs. However, the rate of goals drops because save percentage is higher in the playoffs.</p>
+<p>This makes intuitive sense. In the playoffs, teams have better goaltending since backups no longer play games. Furthermore, teams that deeper into the playoffs tend to have higher quality goaltenders, who are likely to have a higher save percentage than regular season league average. In truth, my analysis reveals that this change in saving behavior makes goal scoring decrease by almost 10% in the playoffs.</p>
+<p>The second result is the hazard ratio for hits, 1.319, signifying <em>an increase of 32% in hits from regular season to playoffs in 5-on-5 situations.</em> As the graph shows, the magnitude of the increase in hits greatly outweighs that of other events. Evidently, the playoffs show a certain level of violence stemming from referees calling less penalties in the playoffs, as described by Chris Peters in a <a href="https://www.cbssports.com/nhl/news/stanley-cup-playoffs-lack-of-penalties-increases-risk-decreases-goals/">CBS Sports article.</a></p>
+<p>The hazard ratio for blocked shots is 1.077, illustrating that <em>as we move from regular season to the playoffs, blocks increase by 7.7% in 5-on-5 situations.</em> As mentioned before, postseason hockey is all about chasing the grand prize, the Stanley Cup. This <a href="https://www.cbc.ca/sports/hockey/nhl/shot-blocking-a-last-resort-in-nhl-playoffs-1.4099442">Associated Press article</a> reveals that players display dedication and sacrifice to attain the ultimate prize: “It’s something that there’s a high desperation level come playoffs and everybody’s doing it,” said Ian Cole, who has 31 blocks in nine games.</p>
+<p>Lastly, let’s observe coach’s challenges, a recent addition to the NHL rulebook. The hazard ratio is 0.916. In other words, coach’s challenge <em>decreases by 8.5% in 5-on-5 situations from the regular season to playoffs.</em> During postseason hockey, the coaches are more conservative since they don’t want to lose the opportunity to call a timeout and draw up a play in the last minutes of the game. Notably, the confidence interval for the hazard ratio of coach’s challenges is extremely wide, demonstrating that this change is <em>not statistically significant.</em> Thus, I would caution the reader from making a conclusion whenever we have this wide of a confidence interval for any events.</p>
+<p><img src="img/hazard-ratio-pp.png" width="600" height="400"></p>
+<p>On the power play, the hazard ratio for goals is 1.022, meaning that <em>as we move from regular season to the playoffs, goals change by a factor of 1.022, or increase by 2%.</em> This result is validated by the fact that the top 16 teams in the league play postseason hockey, where only the best players elevate their game to compete for the Stanley Cup. The offensively gifted players, such as Sidney Crosby, Alexander Ovechkin, and Steven Stamkos, are lethal on the power play and convert chances at a higher rate than your average NHLer.</p>
+<p>The distinction between the hazard ratio for goals at 5-on-5 (0.910) and on the power play (1.022) is worth discussing. At 5-on-5, I’d argue goalies essentially have five defenders protecting the net in different ways. Forwards are covering the points and fighting in puck battles along the boards, and defensemen are focused on guarding the area around the net by preventing forwards from screening the goalie and clearing rebounds. As a result, top notch goalies can perform better in the playoffs, leading to a decrease in the rate of goals. On the other hand, when defending a power play, goalies have one less player to help out. With the extra space gained from the man advantage, teams on the power play can more freely deploy their offensive weapons. In the playoffs, only the best remain and thus, we see a higher rate of goals.</p>
+<p>Importantly, <em>the change in rates of power play goals and shots</em> between the regular season and playoffs is <em>not statistically significant</em> since the confidence intervals for both hazard ratios include 1.0. On the other hand, <em>the change in rates of 5-on-5 goals and shots are statistically significant</em> since the confidence intervals <em>do not include</em> hazard ratios of 1.0.</p>
+<p>The hazard ratios of hits in 5v5 and PP situations are very similar (1.319 and 1.324). This reveals that <em>the change in rate of hits doesn’t depend on game situations.</em> Players will ramp up their game level intensity during the playoffs and play more violently in both 5-on-5 situations and on power plays. This creates for a playoff atmosphere that NHL fans all love and entails huge swings in momentum and an increase in injuries. After the playoffs, few players come out unscathed.</p>
+<p>Let’s finally look at coach’s challenges. This event displays a wide confidence interval, similar to the confidence interval for 5-on-5 situations. Statistically, this can be interpreted as a consequence of small sample size or high standard deviation. This is due to two factors: the league only introduced coach’s challenges in 2015-2016 and they don’t occur regularly during games, certainly not as regularly as shots or hits. The former means that the Play by Play data consists mostly of seasons played before the league implemented this rule. The latter is partly due to a recent change in <a href="https://scoutingtherefs.com/2017/09/19563/nhl-adopts-rule-changes-for-2017-18-season/">NHL Rule for Failed Offside Challenges</a>: “the team that issued the challenge shall be assessed a minor penalty for delaying the game.” NHL commissioner Gary Bettman states: “We’re in effect trying to discourage using the coach’s challenge on offside unless you’re really 100 per cent certain that you’re going to win because it was a blown call,” said NHL Commissioner Gary Bettman. “The coach’s challenge was really intended to focus on glaring errors. And by imposing a two-minute penalty if you’re wrong, it should limit the number of challenges to those instances where there’s a glaring error.”</p>
+</section>
+<section id="v5-survival-curve" class="level2">
+<h2 class="anchored" data-anchor-id="v5-survival-curve">5v5 Survival Curve</h2>
+<p><img src="img/survival-curve-5v5.png" width="600" height="400"></p>
+<section id="legend" class="level5">
+<h5 class="anchored" data-anchor-id="legend">Legend</h5>
+<ul>
+<li>Red curve represents playoffs</li>
+<li>Sky bluish curve represents the regular season.</li>
+</ul>
+</section>
+<section id="analysis" class="level3">
+<h3 class="anchored" data-anchor-id="analysis">Analysis</h3>
+<ul>
+<li>The first result is goals, where the log-rank test reveals the difference in curves is significant.</li>
+<li>There are higher rates of goals in the regular season as its survival curve is lower than the playoff survival curve.</li>
+<li>The graphs for hits and shots contain steeper survival curves, signaling that we are likely to observe a hit earlier in the game than goals, whose survival curves is more rounded.</li>
+<li>This matches an apparent observation of hockey games; goals rarely, if ever, precede hits or shots.</li>
+<li>Future work would be to analyze factors leading to difference in goal-scoring rates and shot rates. Shot angles, shot distance, or quality of goaltending are possible candidates.</li>
+<li>The coach’s challenge survival curve during the playoffs looks significantly different.</li>
+<li>The rate of coach’s challenge during playoffs is noticeably lower during later part of 2nd period and most of the 3rd period.</li>
+</ul>
+</section>
+</section>
+<section id="pp-survival-curve" class="level2">
+<h2 class="anchored" data-anchor-id="pp-survival-curve">PP Survival Curve</h2>
+<p><img src="img/survival-curve-pp.png" width="600" height="400"></p>
+<section id="legend-1" class="level5">
+<h5 class="anchored" data-anchor-id="legend-1">Legend</h5>
+<ul>
+<li>Red curve represents playoffs</li>
+<li>Sky bluish curve represents the regular season.</li>
+</ul>
+</section>
+<section id="analysis-1" class="level3">
+<h3 class="anchored" data-anchor-id="analysis-1">Analysis</h3>
+<ul>
+<li>On the power play, the goal survival curves look slightly different, but the log-rank test indicates that they are not statistically different.</li>
+<li>This confirms the hazard ratio of goals, whose confidence interval includes 1.0.</li>
+<li>Hits survival curves are the most different out of all the survival curves and demonstrate that the game level intensity jumps alot.</li>
+<li>The blocked shot survival curves tell a similar story: There is higher attrition and risk of injuries in playoffs due to players putting their bodies on the line to win.</li>
+<li>In terms of giveaways, the survival curves reveal that playoffs have higher rates of giveaways than regular season.</li>
+<li>Fatigue and faster game tempo lead to more giveaways and exciting hockey for fans. Not so much for coaches.</li>
+</ul>
+</section>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key Takeaways:</h2>
+<ul>
+<li>As we move from regular season to the playoffs, goals decrease by approximately 9 percent in 5-on-5 situations.</li>
+<li>In 5-on-5 situations, there is an increase of 32% in hits and 7.7% in blocks from regular season to playoffs.</li>
+<li>On the power play, goals increase by 2% from the regular season to the playoffs</li>
+<li>Importantly, the change in rates of power play goals and shots between the regular season and playoffs is not statistically significant,</li>
+<li>On the other hand, the change in rates of 5-on-5 goals and shots are statistically significant.</li>
+<li>The change in rate of hits doesn’t depend on game situations.</li>
+<li>The steepness of survival curves show that goals rarely, if ever, precede hits or shots</li>
+<li>Power play survival curves for hits are the most different out of all the survival curves.</li>
+</ul>
+<p>The author would like to thank Sam Ventura for the original idea for this article and feedback and Corey Sznajder and Evan Oppenheimer for reading over the initial version of this article.</p>
+<p><a href="https://github.com/howardbaek/insidethetv-code/blob/master/diff-regular-season-playoffs-nhl.Rmd">Code</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,119 @@
+---
+title: "Summary of an Educational Data Mining Paper"
+description:  "Discovery and Temporal Analysis of Latent Study Patterns in MOOC Interaction Sequences"
+author: "Howard Baek"
+date: "2018-06-28"
+categories: [Research]
+image: "thumbnail.jpg"
+---
+
+## Introduction
+
+This is a summary of the paper, [Discovery and Temporal Analysis of Latent Study Patterns in MOOC Interaction Sequences](https://infoscience.epfl.ch/record/232491), written by [Mina Shirvani Boroujeni](https://www.linkedin.com/in/mina-shirvani-boroujeni-b0574885/), who at the time was a PhD Candidate at EPFL but has now become a Data Scientist at Expedia Group in Switzerland, and [Pierre Dillenbourg](https://www.linkedin.com/in/pierre-dillenbourg-060171/), Professor of Learning Technologies at EPFL.
+
+Previously, the authors have looked into [learners' online participation patterns across time](http://www.educationaldatamining.org/EDM2016/proceedings/paper_94.pdf), studied patterns in timing of study sessions and methods to quantify regularity and [social dimensions](https://infoscience.epfl.ch/record/223718/files/LAK2017_Forum_Dynamics.pdf) (researched evolution of social interactions and changes in learners' roles in MOOC discussion forums over time).
+
+## Purpose of paper
+
+According to the researchers, they "investigate MOOC study patterns and perform temporal analysis of learners' longitudinal behaviors... we aim to identify learners' study patterns during assessment periods, that is their learning sequences from the opening time of an assignment until the submission deadline".
+
+> Research question: What are the different study patterns exhibited by learners during MOOCs assessment periods and how do learners' study patterns evolve over time?*
+
+
+
+## Dataset
+
+The researchers used data of the interaction logs of students in *Functional Programming Principles in Scala* which is an undergraduate engineering MOOC (Massive Open Online Course) produced by EPFL University, a university in Switzerland. The course contains seven video lectures and six assignments where "assessment periods (assignment release to hard deadline) varied between 11 to 18 days". Also, "the dataset includes three categories of events, describing learners??? interaction with videolectures (play, pause, download, seek, change speed), assignments(submit) and discussion forums (read, write, or vote a message)"
+
+
+
+### Data Preprocessing
+
+The researchers split the full time period of interaction logs into "subsequences corresponding to each assessment period". They filtered out learners who were inactive (active in less than three assessment periods). AS a result, the study contains "interaction subsequences of 7527 learners".
+
+
+
+## Hypothesis-Driven Method
+
+This method involves the researchers labelling each students' activity sequences and then performing clustering.
+
+In order to identify patterns, the researchers categorized the sub-sequences according to two criteria:
+
+1)  Whether the learner starts off by watching a video or submitting an assignment
+2)  Whether the learner submits the assignment before the deadline.
+
+These two criteria yielded the following study patterns:
+
+-   V_start: Learner watched the video(s) before submitting the assignment
+-   A_start: Learner submitted the assignment without having watched the corresponding video(s)
+-   Audit: Learner watched the video(s) but did not submit the assignment
+-   Inactive: Learner did not watch the video(s) and did not submit the assignment.
+
+Then, the researchers went on to apply *hierarchial agglomerative clustering* to extract different patterns of learner profiles. .
+
+
+
+### Results:
+
+_Study pattern distribution:_ 
+
+- 69% = learners watch videos before submitting an assignment. 
+- 10% = learners skip video lectures and directly submit assignments. 
+- 8% to 18% = Auditing students increase towards the end of the course 
+- 4% to 20% = Proportion of Inactive students increases.
+
+- Learners who start by watching videos start their learning sequence earlier
+
+- Interestingly, learners in A_start sessions are less likely to attempt an assignment multiple times and only 6% of A_start learners access lectures after submitting the assignment. Thus, this signifies that A_start learners are likely to know the assignment topic beforehand.
+
+
+
+#### Fixed Study Pattern: 
+
+- Comprises 53% of learners who have identical study patterns.
+
+-   Cluster 1: Comprises 44% of participants who rely on lectures for learning.
+
+-   Cluster 2: Comprises 2% of participants who do not watch the videos before submitting any assignments.
+
+-   Cluster 3: Comprises of *auditing* students who do not submit any of the assignments, but follow most of the videos.
+
+
+
+#### Changing Study Pattern: 
+
+- Comprises 47% of learners who change their approach at least once during the course.
+
+-   Cluster 4: Mainly Assignment_Start Approach, but in first and last assignments, they watch videos before submitting
+
+-   Cluster 5: Main approach is V_start but skip videos in one or two assignments during course. Interesting point: Start time of learning sequences is closer to assignment deadline, which means proximity of deadline makes them change study approach
+
+-   Cluster 6: Mainly watch videos first but in last two periods, they submit assignments without watching videos. Achieve nearly complete grades in the first four assignments so these learners are likely to receive a high final grade even without receiving the highest score in the reamining assignments. *However, more information about learners' experience and conditions is required to precisely determine the factors triggering changes in learners' study approaches*
+
+-   Cluster 7 and 8: Watch the videos in the first few assignments, but then loses motivation. Cluster 7: submits nearly half of the assignments, but Cluster 8: submit only the first one or two, before switching to the auditing state.
+
+-   Clusters 9, 10, 11: Start with V_start approach, change to Audit state, and finally wstop watching videos and drop out. Cluster 9: Submit first four assignments and drop out, but in Cluster 10 and 11: stop doing assignments and eventually drop out.
+
+
+
+## Data-Driven Method
+
+This method invovles unsupervised learning to "discover and track latent study patterns from students' interaction sequences".
+
+It consists of four steps: 1) Activity Sequence Modeling 2) Distance computation 3) Clustering (Hierarchial Agglomerative Clustering) 4) Cluster Matching
+
+
+
+### Result
+
+Identification of 13 different study patterns in Table3.
+
+Figure 3 = Transition Probabilities between different study patterns. Patterns 10 and 7 are the most predictable study patterns. Pattern 11, *inactive learners*, is repeatable with a probability of 0.6  Pattern 10 represents a similiar approach to A_start Pattern 7 is the most popular (strongest connections).
+
+
+
+## Conclusion
+
+In this paper, Boroujeni and Dillenbourg explore two methods to answer their research question: hypothesis method and data-driven method. The hypothesis method reveals that learning approaches definitely change in different manners. Some change to another method and then revert back to their initial method whereas others permanently switch to the new approach. The data-driven method is an unsupervised learning method that uses "action sequences as input". This revealed 13 different study patterns. Importantly, this research can be "used for analysis of learners' activities during the course duration", opening doors to real-time intervention of students facing difficulties. While this paper seeks to analyze different study patterns and their evolutions, our paper will investigate specific patterns that lead to student dropouts. A similar approach is briefly covered in the paper where Table 1 shows the percentage of students who passed the course. This paper only looks into different study patterns and their evolutions, but does not address student retention with respect to the different study patterns students have. On the other hand, we will focus on the problem of student dropouts from MOOCs and its factors using data mining algorithms such as clustering and classification.
+
+Our work will directly build on this paper; as mentioned in the Discussion Section, we will capture an overview of the captured behaviors and study pattern sequences into an analytic dashboard to enable intervention and improvement of the course materials by instructors. We will create it with the [Shiny package in R](https://shiny.rstudio.com/). Shiny allows for interactive visualization of data, which will definitely aid instructors in understanding their students and helping those in need.

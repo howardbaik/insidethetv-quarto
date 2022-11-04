@@ -1,0 +1,35 @@
+---
+title: "Howard Baek"
+image: profile.jpg
+about:
+  template: trestles
+  image-shape: round
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/howard_baek
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/howard-baek/
+    - icon: github
+      text: Github
+      href: https://github.com/howardbaek
+---
+
+Howard Baek is a Master's student in Biostatistics at the University of Washington. Also, he is a Contractor at Merck, where he contributes to internal R packages and designs internal Shiny apps for analysis and reporting in a regulatory environment.
+
+## Education
+
+University of Washington | Seattle, WA
+Master of Science in Biostatistics | March, 2023
+
+University of Washington | Seattle, WA
+Bachelor of Science in Statistics (Minor: Mathematics)  | June, 2021
+
+## Experience
+
+Merck | Contractor | March, 2022 - present
+
+Merck | Biostatistics Intern | June, 2022 - Aug, 2022
+
+NOAA | Machine Learning Intern | June, 2021 - Sept, 2022

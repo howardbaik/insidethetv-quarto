@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.245">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Howard Baek">
+<meta name="dcterms.date" content="2019-06-15">
+<meta name="description" content="I extend a MIT SSAC Research Paper by Cervone, DAmour, Bornn, and Goldsberry on Expected Possession Value or EPV.">
+
+<title>Howard Baek - Animating Expected Possession Value in the NBA Extended</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Howard Baek</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/howardbaek"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/howard_baek"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Animating Expected Possession Value in the NBA Extended</h1>
+                  <div>
+        <div class="description">
+          I extend a MIT SSAC Research Paper by Cervone, DAmour, Bornn, and Goldsberry on Expected Possession Value or EPV.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Data Visualization</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Howard Baek </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 15, 2019</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p><em>This is the second post about EPV. Click here for the <a href="http://insidethetv.rbind.io/post/animating-expected-possession-value-in-the-nba/">first post.</a></em></p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In a MIT Sloan Sports Analytics Conference Research Paper, Cervone, D’Amour, Bornn, and Goldsberry create a metric called Expected Possession Value, EPV. They use optical player tracking data to calculate the number of points the offense is expected to score by the end of the possession <em>in real time</em>, given everything we know now. In other words, EPV of a possession is the weighted average of the outcomes of all future paths that the possession could take (Cervone et al.)</p>
+<p>The optical player tracking data is generated with <a href="https://www.stats.com/sportvu-basketball/">STATS SPORTVU</a>, a six-camera system installed in basketball arenas to track the real-time positions of players and the ball 25 times per second.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/sportvu-demo.gif" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Above: Demo of STATS SportVU</figcaption><p></p>
+</figure>
+</div>
+<p>The model breaks down a possession into discrete (macrotransitions) and continuous actions (microtransitions). Macrotransitions include passes, shots, and turnovers whereas microtransitions are defined as every other movement that players make with the ball.</p>
+<p>Mathematically,</p>
+<p><img src="img/epv-equation.png" width="650" height="70"></p>
+<p>A snapshot of a single possession in a game between the Spurs and Thunder illustrates the practicality of EPV:</p>
+<p><img src="img/paper-figure1.png" width="650" height="500"></p>
+<p>Since EPV is calculated in <em>real time</em>, the authors of the paper interpret EPV as a stock ticker. This lends itself well to an augmented graph where we have the spatial configuration of players on top and the stock ticker representation of EPV on the bottom:</p>
+<p><img src="img/paper-figure2.png" width="650" height="320"></p>
+<p>The above graph is best explained by the authors:</p>
+<blockquote class="blockquote">
+<p>Consider the following possession from the Spurs/Cavaliers game on February 13, 2013. Down by 2 with less than 10 seconds left, the Spurs inbounded to Tony Parker, who drove to the basket, drawing defenders into the paint and leaving Kawhi Leonard wide open in the corner. Instead of attempting the tightly contested layup that would tie the game, Parker dished to a wide-open Leonard, who promptly sank the game-winning 3-pointer, almost unchallenged by the defense. While Leonard’s 3-pointer was this possession’s (and game’s) “checkmate”, we see from Figure 2 how valuable Parker was in setting it up. Parker actually dramatically increased the value of the possession twice - first by driving towards the basket, and then by passing to Leonard.</p>
+</blockquote>
+<p><strong>I would like to extend this work by animating the above graph using <a href="https://gganimate.com/"><code>gganimate</code></a> and interpreting each movement during a NBA game on November 10th, 2013, between the <a href="https://www.youtube.com/watch?v=K6twYcwd45U">Miami Heat vs Brooklyn Nets</a> within the context of Expected Possession Value. Unlike a static graph, an animated graph conveys a strong, clear narrative that help teams understand their tracking data.</strong></p>
+<p>A couple of notes: EPV is calculated as soon as the ball crosses the mid court line and the jersey numbers on each player are scraped from <a href="https://www.swishanalytics.com/nba/players/player?id=214152">Swish Analytics.</a> The site reflects recent jersey numbers, which means Lebron James is #23 in the animations even though he wore #6 for the Miami Heat.</p>
+<p>This work was enabled by Dan Cervone’s <a href="https://github.com/dcervone/EPVDemo">data and code</a>.</p>
+<p>The code used in this post is stored <a href="https://github.com/howardbaek/nba-animation/blob/master/final-result.Rmd">here</a></p>
+</section>
+<section id="frantic-action-leading-to-terry-3-pointer" class="level2">
+<h2 class="anchored" data-anchor-id="frantic-action-leading-to-terry-3-pointer">Frantic Action leading to Terry 3-Pointer</h2>
+<p><img src="img/gamefilm-52.gif" class="img-fluid"></p>
+<p><img src="img/anim-52.GIF" class="img-fluid"></p>
+<p>As the ball rolls toward the sidelines, two Heat players double team Paul Pierce (#34), who dishes off to Andrei Kirilenko (#47). Then, the Nets incrementally increase the value of the possession by passing the ball twice, from Kirilenko to Andray Blatche (#0) and from Blatche to a wide open John Terry (#3), who knocks down the 3-pointer. During this sequence of events, EPV increases like a step function with each pass, resulting in a high percentage 3-point shot.</p>
+<p><a href="http://insidethetv.rbind.io/post/animating-expected-possession-value-in-the-nba/">The previous EPV post</a> talks about a similar play, “Frantic Action leading to Chalmers 3-Pointer”, where the ball is in no man’s land and EPV perfectly plateuas around 1.035. In this possession, there is no one around the ball. Consequently, EPV, a metric that seems to account for the proximity of players around the ball, shows absolutely no change. On the other hand, in the beginning of this possession, when the ball is rolling towards the slidelines, EPV does not perfectly plateua. The reason is, I think, that in this posession, the ball is surrounded by three players who are chasing it and EPV accounts for the proximity of these players, thus changing slightly.</p>
+</section>
+<section id="lebron-james-alley-oop" class="level2">
+<h2 class="anchored" data-anchor-id="lebron-james-alley-oop">Lebron James Alley-Oop</h2>
+<p><img src="img/gamefilm-97.gif" class="img-fluid"></p>
+<p><img src="img/anim-97.GIF" class="img-fluid"></p>
+<p>Rashard Lewis (#21) steals the pass from Pierce and dishes off to Lebron James (#23), who passes to Mario Chalmers (#6). On a fast break, Chalmers drives toward the basket with James and EPV jumps from just below 1.00 to more than 1.30, which illustrates a high value play. As Chalmers throws the ball up for a James’s alley-oop, EPV spikes to above 1.5, responding to the situation where James has a wide open opportunity to throw down 2 points. Lastly, as the ball is no longer in play, EPV plateaus, just like when the ball is in no man’s land during “Frantic Action leading to Chalmers 3-Pointer”. For the first time, we see the EPV dynamics of a fast break: the attacking team starts the possession with a EPV significantly higher than the EPV of a NBA baseline possession, 1.00.</p>
+</section>
+<section id="miami-heat-set-play" class="level2">
+<h2 class="anchored" data-anchor-id="miami-heat-set-play">Miami Heat Set Play</h2>
+<p><img src="img/gamefilm-108.gif" class="img-fluid"></p>
+<p><img src="img/anim-108.GIF" class="img-fluid"></p>
+<p>This possession looks like a set play by Erik Spoelstra and the Heat. After Chalmers passess off to James, he knows exactly what is about to happen. He sneaks out to the corner 3-point position, losing his defender, Paul Pierce. While James drives the basket, Pierce stays in the paint trying to stop James. However, James knows exactly what to do next: dish off to a wide open Chalmers for an easy 3-point shot. As James passes to Chalmers, EPV spikes from 0.96 to 1.15, signifying a very positive contribution to the offense. Furthermore, judging from Chalmers’ body language (wide open arms), he was fully expecting the ball. All in all, this set play entails many fluctuations in EPV, but I believe it is a successful one because it culminates in an optimal 3-point shot; it was taken at the highest EPV in the entire possession.</p>
+</section>
+<section id="elite-passing-from-derron-williams" class="level2">
+<h2 class="anchored" data-anchor-id="elite-passing-from-derron-williams">Elite Passing from Derron Williams</h2>
+<p><img src="img/gamefilm-222.gif" class="img-fluid"></p>
+<p><img src="img/anim-222.GIF" class="img-fluid"></p>
+<p>As Kevin Garnett (#21) screens for Derron Williams (#31), EPV slightly increases, demonstrating a positive contribution. Eventually, Williams finds open space and drives the basket, pulling in another defender. This leaves Joe Johnson (#7) open for an easy 3-point shot. As Williams drives the basket and dishes off to a wide open Johnson, EPV skyrockets from 0.95 to 1.50. This immense jump in EPV proves that Williams is an elite point guard; his ability to use the screen to find open space, draw defenders, and ultimately distribute the ball into optimal space for his teammates entails a tremendous increase in EPV.</p>
+</section>
+<section id="james-flies-through-the-air" class="level2">
+<h2 class="anchored" data-anchor-id="james-flies-through-the-air">James flies through the air</h2>
+<p><img src="img/gamefilm-223.gif" class="img-fluid"></p>
+<p><img src="img/anim-223.GIF" class="img-fluid"></p>
+<p>EPV is erratic as the Heat pass the ball around quite a bit in this possession. A notable change in EPV occurs when James finds a temporarily wide open Chalmers outside the 3-point line; EPV jumps from 0.95 to approximately 1.17. The defender closes in on him quickly and instead of shooting, Chalmers yields to a closely guarded Ray Allen (#34), decreasing EPV to 0.90. Allen forgoes the contested shot and finds James in the middle of the court. As James flies through the air towards the basket, EPV steadily increases to the maximum value in this possession (1.20), indicating that the Heat executed well by putting the ball in James hands.</p>
+</section>
+<section id="james-incredible-offensive-ability" class="level2">
+<h2 class="anchored" data-anchor-id="james-incredible-offensive-ability">James’ incredible offensive ability</h2>
+<p><img src="img/gamefilm-90.gif" class="img-fluid"></p>
+<p><img src="img/anim-90.GIF" class="img-fluid"></p>
+<p>Norris Cole (#30) uses the screen set by Chris Bosh (#1) to beat his defender and drive the basket. During this drive, EPV spikes up from below 1.0 to more than 1.2. As seen in the film, the play ends on an isolation with the ball in James hands. As soon as he fakes one way and goes the other way, EPV increases tremendously from 1.02 to 1.60, revealing that James one-on-one talent is exceptional. The play concludes with James scoring an easy layup, demonstrating that James made the difference in this possession in terms of EPV with his one-on-one play.</p>
+<p><img src="img/gamefilm-106.gif" class="img-fluid"></p>
+<p><img src="img/anim-106.GIF" class="img-fluid"></p>
+<p>In this possession, not much happens until the point guard throws the ball up for a James alley-oop. Again, as James throws down the dunk, EPV catapults instantly, from approximately 1.00 to more than 1.50. EPV demonstrates Lebron’s offensive awareness and ability to exploit the space near the basket.</p>
+</section>
+<section id="wades-smarts" class="level2">
+<h2 class="anchored" data-anchor-id="wades-smarts">Wade’s Smarts</h2>
+<p><img src="img/gamefilm-5.gif" class="img-fluid"></p>
+<p><img src="img/anim-5.GIF" class="img-fluid"></p>
+<p>Instead of shooting a contested 3-pointer, Dwayne Wade (#3) wisely uses the screen set by his teammate and slips away from his defender, increasing EPV. Using the newly created space by the screen, Wade knocks down a 2-pointer. EPV demonstrates Wade’s offensive smarts; when Wade is closely defended, EPV plummets to under 1.00, but when Wade uses the screen to make space for himself, EPV rises to above 1.03.</p>
+<p>When ball goes to Lebron James, #23, EPV spikes up from 0.96 to more than 1.03, signifying that James is an excellent shooter. This reasoning is explained in the paper, in page 20, “our model estimates largely agree with basketball intuition… because LeBron James is a better shooter than Norris Cole, the value of his shot attempt is higher…”</p>
+</section>
+<section id="observing-boshs-shot-with-epv" class="level2">
+<h2 class="anchored" data-anchor-id="observing-boshs-shot-with-epv">Observing Bosh’s Shot with EPV</h2>
+<p><img src="img/gamefilm-28.gif" class="img-fluid"></p>
+<p><img src="img/anim-28.GIF" class="img-fluid"></p>
+<p>Wade slowly dribbles up the court and surveys the defense’s formation. Wade seems to use the screen to go around his defender, but realizes that Bosh is wide open in the corner and passes off to James, who instantly relays to Bosh. As Wade passes to James, EPV rises marginally, but when James passes to Bosh, who is in position for a wide open 3-pointer, EPV shoots up from 1.12 to 1.62. Notably, with so much time and space, Bosh winds up for the shot leading to a decrease in EPV to 1.40. This illustrates that the more time he takes to take the shot, the lower the EPV because a defender could close down on him at any second and take away the wide open shot.</p>
+<p><img src="img/gamefilm-86.gif" class="img-fluid"></p>
+<p><img src="img/anim-86.GIF" class="img-fluid"></p>
+<p>The most important and interesting moment during this possession is Bosh’s 2-point shot just inside the 3-point line. EPV falls off from above 1.05 to 0.98. Perhaps, EPV plummets at this time because Bosh is attempting a long range 2-point shot instead of taking a couple steps backwards and attempting a 3-pointer, which is 50% more valuable. Another explanation could be the congestion around the paint. There are four defenders around the paint- John Terry is the only defender far from the paint and defending Ray Allen and his deadly 3-point shot. Bosh has very little real estate to work with.</p>
+</section>
+<section id="drawback-of-epv-defensive-details" class="level2">
+<h2 class="anchored" data-anchor-id="drawback-of-epv-defensive-details">Drawback of EPV: Defensive Details</h2>
+<section id="first-possession" class="level3">
+<h3 class="anchored" data-anchor-id="first-possession">First Possession</h3>
+<p><img src="img/gamefilm-207.gif" class="img-fluid"></p>
+<p><img src="img/anim-207.GIF" class="img-fluid"></p>
+</section>
+<section id="second-possession" class="level3">
+<h3 class="anchored" data-anchor-id="second-possession">Second Possession</h3>
+<p><img src="img/gamefilm-214.gif" class="img-fluid"></p>
+<p><img src="img/anim-214.GIF" class="img-fluid"></p>
+<p>EPV does not account for defensive plays such as blocks. In the first possession, Bosh blocks the shot, but EPV doesn’t decrease at all. Instead, it just plateaus at 1.3 while the ball is rolling towards the sidelines. In the second possession, Pierce swats away a James layup, but EPV also just plateaus at 1.15. The reason is elaborated by the authors of EPV in their theoretical paper, <a href="https://arxiv.org/abs/1408.0777">“A Multiresolution Stochastic Process Model for Predicting Basketball Possession Outcomes”</a></p>
+<blockquote class="blockquote">
+<p>A number of smaller details could also be addressed…we also do not distinguish between different types of turnovers (steals, bad passes, ball out of bounds, etc.), though this is due to a technical feature of our data set. Indeed, regardless of the complexity and refinement of an EPV model, we stress that the full resolution data still omits key information, such as the positioning of players’ hands and feet, their heights when jumping, and other variables that impact basketball outcomes. As such, analyses based on EPV are best accompanied by actual game film and the insight of a basketball expert”</p>
+</blockquote>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Using EPV to analyze plays like this blog post allows coaches and analysts to put their players in the best position to succeed, which means making plays that yield maximum EPV. Expected Possession Value confirms and quantifies our basketball intuition of a valuable play: a wide open 3-point shot, a fast break in an odd man situation, or penetrating the defense for an easy layup or jumper. However, a shortcoming of EPV is its failure to account for defensive turnovers such as a block. As a result, like this blog post, coaches and analysts should combine EPV analysis with game film for the most accurate representation of a play. I’d like to end this post with a memorable quote from the authors:</p>
+<blockquote class="blockquote">
+<p>These insights, which can be reproduced for any valid NBA possession in our data set, have the potential to reshape the way we quantify players’ actions and decisions</p>
+</blockquote>
+<p><br></p>
+</section>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<p>This section contains static plots of the above EPV curves with event annotations such as “Pass”, “Assist”, or “Shot Made”. These static curves allow coaches and analysts to attribute a change in EPV to an event in the dataset with pinpoint accuracy.</p>
+<p><br></p>
+<section id="frantic-action-leading-to-terry-3-pointer-1" class="level3">
+<h3 class="anchored" data-anchor-id="frantic-action-leading-to-terry-3-pointer-1">Frantic Action leading to Terry 3-Pointer</h3>
+<p><img src="img/static-52.png" width="550" height="340"></p>
+</section>
+<section id="lebron-james-alley-oop-1" class="level3">
+<h3 class="anchored" data-anchor-id="lebron-james-alley-oop-1">Lebron James Alley-Oop</h3>
+<p><img src="img/static-97.png" width="550" height="340"></p>
+</section>
+<section id="miami-heat-set-play-1" class="level3">
+<h3 class="anchored" data-anchor-id="miami-heat-set-play-1">Miami Heat Set Play</h3>
+<p><img src="img/static-108.png" width="550" height="340"></p>
+</section>
+<section id="elite-passing-from-derron-williams-1" class="level3">
+<h3 class="anchored" data-anchor-id="elite-passing-from-derron-williams-1">Elite Passing from Derron Williams</h3>
+<p><img src="img/static-222.png" width="550" height="340"></p>
+</section>
+<section id="james-flies-through-the-air-1" class="level3">
+<h3 class="anchored" data-anchor-id="james-flies-through-the-air-1">James flies through the air</h3>
+<p><img src="img/static-223.png" width="550" height="340"></p>
+</section>
+<section id="james-incredible-offensive-ability-1" class="level3">
+<h3 class="anchored" data-anchor-id="james-incredible-offensive-ability-1">James’ incredible offensive ability</h3>
+<p><img src="img/static-90.png" width="550" height="340"></p>
+</section>
+<section id="james-alley-oop" class="level3">
+<h3 class="anchored" data-anchor-id="james-alley-oop">James’ Alley-oop</h3>
+<p><img src="img/static-106.png" width="550" height="340"></p>
+</section>
+<section id="wades-smarts-1" class="level3">
+<h3 class="anchored" data-anchor-id="wades-smarts-1">Wade’s Smarts</h3>
+<p><img src="img/static-5.png" width="550" height="340"></p>
+</section>
+<section id="bosh-wide-open-3-pointer" class="level3">
+<h3 class="anchored" data-anchor-id="bosh-wide-open-3-pointer">Bosh Wide Open 3-Pointer</h3>
+<p><img src="img/static-28.png" width="550" height="340"></p>
+</section>
+<section id="bosh-long-range-2-pointer" class="level3">
+<h3 class="anchored" data-anchor-id="bosh-long-range-2-pointer">Bosh Long Range 2-Pointer</h3>
+<p><img src="img/static-86.png" width="550" height="340"></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

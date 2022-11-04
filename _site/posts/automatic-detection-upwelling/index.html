@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.245">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Howard Baek">
+<meta name="author" content="Elizabeth Eli Holmes">
+<meta name="dcterms.date" content="2021-10-26">
+<meta name="description" content="We introduce a highly effective algorithm for detecting upwelling, the automatic detection method using NOAA satellite image data.">
+
+<title>Howard Baek - Automatic Detection Method</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Howard Baek</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/howardbaek"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/howard_baek"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Automatic Detection Method</h1>
+                  <div>
+        <div class="description">
+          We introduce a highly effective algorithm for detecting upwelling, the automatic detection method using NOAA satellite image data.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Data Analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Authors</div>
+      <div class="quarto-title-meta-contents">
+               <p>Howard Baek </p>
+               <p>Elizabeth Eli Holmes </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 26, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>The National Oceanic and Atmospheric Administration (<a href="https://www.noaa.gov/">NOAA</a>) defines upwelling as “a process in which deep, cold water rises toward the surface”. It is initiated by wind blowing parallel to the coastline and moving warm water offshore, perpendicular to its direction. As surface water moves offshore, deeper, colder, and nutrient rich water rises up from deep sea level and replaces the warm water. “The upward movement of this deep, colder water is called upwelling” (<a href="https://oceanexplorer.noaa.gov/explorations/02quest/background/upwelling/upwelling.html">NOAA Ocean Explorer</a>).</p>
+<p><img src="img/upwelling-diagram.jpeg" class="img-fluid"></p>
+<p><em>Figure 1: Illustration of Upwelling. As surface winds blow towards the equator, they push warm coastal water away from the coast, which brings in deeper, colder, nutrient rich water from beneath the surface to replace the warm water.</em></p>
+<p>Upwelling brings nutrient rich water to the surface and supplies nutrition necessary for biological productivity. “Coastal upwelling ecosystems like the U.S. west coast are some of the most productive ecosystems in the world and support many of the world’s most important fisheries. Although coastal upwelling regions account for only one percent of the ocean surface, they contribute roughly 50 percent of the world’s fisheries landings” (NOAA Ocean Explorer).</p>
+<p>Literature on upwelling highlight changes in upwelling patterns. <span class="citation" data-cites="bograd_phenology_2009">Bograd et al. (<a href="#ref-bograd_phenology_2009" role="doc-biblioref">2009</a>)</span> discovered “a trend towards a later and shorter upwelling season in the northern CCLME (California Current large marine ecosystem)”. They also assert that there is “significant interannual variability in upwelling characteristics”. The spring upwelling began later, resulting in a shorter upwelling season. Studying upwelling is useful for “resource managers tasked with assessing future changes in commercially important fish and protected species populations”.</p>
+<p><span class="citation" data-cites="xiu_future_2018">Xiu et al. (<a href="#ref-xiu_future_2018" role="doc-biblioref">2018</a>)</span> looked at the effect of global warming on coastal upwelling systems. They state, “global warming will enhance land–sea temperature gradients that in turn will increase upwelling favorable winds (i.e., the Bakun hypothesis)”. Experts predict “increased upwelling intensity and duration at higher latitudes”. This will affect global fish supply as change in upwelling is a driving factor of change in marine ecosystems.</p>
+</section>
+<section id="purpose" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="purpose"><span class="header-section-number">2</span> Purpose</h2>
+<p>We introduce a simple, but highly effective algorithm for detecting upwelling: an automatic detection method using satellite image data from NOAA. This method identifies the upwelling hotspots, months of strong upwelling, and the duration of upwelling. This will allow marine scientists and researchers to prepare for the effect of global warming on upwelling systems.</p>
+</section>
+<section id="data" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="data"><span class="header-section-number">3</span> Data</h2>
+<p>The dataset, <a href="https://www.ncdc.noaa.gov/oisst">Daily Optimum Interpolation (OI) SST</a>, comes from NOAA’s data server, <a href="https://coastwatch.pfeg.noaa.gov/erddap/griddap/ncdcOisst21Agg.graph?sst%5B(2019-01-01T12:00:00Z)%5D%5B(0.0)%5D%5B(2.75):(86.25)%5D%5B(192.25):(275.75)%5D&amp;.draw=surface&amp;.vars=longitude%7Clatitude%7Csst&amp;.colorBar=%7C%7C%7C16%7C32%7C&amp;.bgColor=0xffccccff">ERDDAP</a>. It contains four columns: time, latitude, longitude, and SST (sea surface temperature). SST is defined as the water temperature close to the ocean’s surface.</p>
+<div>
+<div style="float: left; position: relative; top: 0px; padding: 30px;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/area-of-interest.png" width="400" height="600" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<p><em>Figure 2: NOAA satellite image showing sea surface temperature (SST) in Celsius off the coast of Vancouver Island and Washington. Red is high temperature (~18°C), green is medium temperature (~15°C) and blue/purple is low temperature (~13°C)</em></p>
+<p>As seen in Figure 2, we chose to focus on latitudes [42.625°N, 52.125°N] and longitudes [229.875°W, 236.625°W] because this area avoids the Alaska current to the north and the California current to the south. Also, the east boundary crops out land, which will save memory. This area corresponds to the coast of Vancouver Island (British Columbia) and Washington.</p>
+<p><br> <br></p>
+</div></section>
+<section id="automatic-detection-method" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="automatic-detection-method"><span class="header-section-number">4</span> Automatic Detection Method</h2>
+<p><span class="citation" data-cites="gidhagen_coastal_1987">Gidhagen (<a href="#ref-gidhagen_coastal_1987" role="doc-biblioref">1987</a>)</span> first uses an automatic method to define upwelling: “Upwelling was proved if an <em>in situ</em> measurement showed an abnormal temperature drop of at least 2°C compared to earlier and surrounding measurements”. Using this method, he found that September is a month of strong upwelling in the Swedish coastline of the Baltic Sea. “The increased rate of upwelling in September is not due to a higher number of upwellings, but rather to a longer duration”. Overall, he found “there is a strong year-to-year variation in the rate of upwellings”.</p>
+<p><span class="citation" data-cites="lehmann_statistical_2012">Lehmann, Myrberg, and Höflich (<a href="#ref-lehmann_statistical_2012" role="doc-biblioref">2012</a>)</span> discusses the automatic detection method: “Upwelling was detected by calculating the temperature difference for each individual pixel from the zonal mean temperature, for every pixel line.” The authors tested two temperature thresholds (2°C and 3.5°C), both of which yielded “erroneous upwelling areas detected far offshore”. Thus, they registered upwelling if it occurred within 28 km of the coast.</p>
+<p>Drawing inspiration from past work, we created a custom automatic detection method to algorithmically determine when and where upwelling occurs. The algorithm looks at each latitude and finds the SST of the coastal water (water closest to land) and the SST of water 2 and 3 degrees away from land (SST coast 2 and SST coast 3). Then, it computes two differences: the difference in SST between the coastal water and SST coast 2 and the difference in SST between the coastal water and SST coast 3. It checks if either of these two differences exceeds a threshold of 2.5°C. If it does, we indicate upwelling at the specific latitude. If not, we indicate non-upwelling.</p>
+<p><img src="img/stamen-map-final.png" class="img-fluid"></p>
+<p><em>Figure 3: Stamen map showing upwelling locations off the coast of Vancouver Island and Washington. Red dots are placed at latitudes where we detected upwelling. Blue dots are placed 2 and 3 degrees away from the red dots.</em></p>
+<p>As seen in Figure 3, the automatic detection method accurately portrays the location of upwelling along the coast. It corresponds well with visually looking at the SST and finding locations where the color of the SST on the coast is blue and the color of the SST on offshore waters is red. In a later section, <a href="#sec-exploration">Section&nbsp;5.0.2</a>, we will illustrate the changes in the timing and length of upwelling season from 1982 to 2020.</p>
+</section>
+<section id="results" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="results"><span class="header-section-number">5</span> Results</h2>
+<section id="relationship-of-the-automatic-detection-method-with-the-ekman-upwelling-index" class="level4" data-number="5.0.1">
+<h4 data-number="5.0.1" class="anchored" data-anchor-id="relationship-of-the-automatic-detection-method-with-the-ekman-upwelling-index"><span class="header-section-number">5.0.1</span> Relationship of the Automatic Detection Method with the Ekman Upwelling Index</h4>
+<p>The automatic detection method gives us an indicator of upwelling at a certain latitude. This allows us to perform logistic regression to examine the relationship between a predictor and the upwelling indicator.</p>
+<p>We merged our dataset with data on the daily averages of Ekman upwelling index data at three different latitudes: 42°N, 45°N, and 48°N. This data comes from the <a href="https://oceanview.pfeg.noaa.gov/products/upwelling/intro">Environmental Research Division at NOAA Fisheries - Southwest Fisheries Science Center.</a> The Ekman upwelling index is an index of the strength of upwelling along the coast and is calculated using wind dynamics. Positive values indicate upwelling and negative values non-upwelling.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/monthly-avg-facetted.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 4 : Line plot of monthly averages of Ekman upwelling index on the y-axis and year on the x-axis facetted by latitude (42°N, 45°N and 48°N) and upwelling months (June ~ Oct / Nov ~ May).</em></p>
+<p>Above is a line plot of the monthly averages of Ekman upwelling index facetted by upwelling months and latitude. Upwelling months are from June to October, months known to have strong upwelling patterns. Non-upwelling months are from November to May. We observe the trend line in the non-upwelling months to be well below zero and the trend line in the upwelling months to be well above zero. This demonstrates that the upwelling index is appropriate for detecting upwelling. Below, we further examine the relationship between the upwelling labels from the automatic detection method and the upwelling index with logistic regression.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/logistic-regression-plot-hist.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 5: Logistic curve of upwelling indicator variable on the y-axis and daily average of Ekman upwelling index on the x-axis at three latitudes: 42°N, 45°N, and 48°N. Also shown is histogram of the distribution of the upwelling index at upwelling (1) and non-upwelling (0).</em></p>
+<p>Above is a logistic curve drawn on a plot of the upwelling indicator variable and daily average of Ekman upwelling index. As we go from 42°N to 45°N and from 45°N to 48°N, there seem to be less and less positive upwelling indexes at <code>y = 1</code>. In other words, at higher latitudes, there is less of a correlation between Ekman upwelling index and the automatic detection method. When we ran a logistic regression on two predictors, Ekman upwelling index and latitude, we observed that daily average of upwelling index has a statistically significant, positive relationship with the binary variable of upwelling (0/1).</p>
+</section>
+<section id="sec-exploration" class="level4" data-number="5.0.2">
+<h4 data-number="5.0.2" class="anchored" data-anchor-id="sec-exploration"><span class="header-section-number">5.0.2</span> Exploration of Upwelling Percentage</h4>
+<blockquote class="blockquote">
+<p>Upwelling percentage: Proportion of days over relevant timeframe in a figure that are categorized as upwelling by our automatic detection method.</p>
+</blockquote>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/heatmap-upwelling-percentage-decade.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 6: Heatmap of upwelling percentage over four decades. Red means high upwelling percentage (~50%) , blue means low upwelling percentage (~15%), and green is the average upwelling percentage (~35%). The 2020s has been omitted for lack of data.</em></p>
+<p>Overall, low latitudes have higher upwelling percentage than high latitudes. Over the four decades, upwelling percentage is highest (~50%) at 40.0°N ~ 42.5°N. Then, it decreases to around 35% at 42.5°N ~ 45.0°N. Above this latitude, upwelling percentage decreases to 15% at 45.0°N ~ 50.0°N. Notably, in the 1980s and 2010s, upwelling percentage around 35% was observed at the lower latitudes (40°N ~ 42.5°N) and higher latitudes (47.5°N ~ 50.0°N).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/heatmap-upwelling-percentage-month-year.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 7: Heatmap of the proportion of upwelling days in each month from 1982 to 2020. Red means high upwelling percentage (~95%) , blue means low upwelling percentage (~0%), and green is the average upwelling percentage (~50%).</em></p>
+<p>This plot illustrates a a fairly consistent pattern of high upwelling percentage from June to October. There is extremely high upwelling percentage (~95%) in August, September, and October. On the other hand, there is low upwelling percentage (~0%) from November to May. This shows the upwelling months (upwelling percentage higher than 25%), to be from June to October and the non-upwelling months (upwelling percentage lower than 25%) from November to May.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/heatmap-upwelling-percentage-latitude-bins.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 8: Heatmap of upwelling percentage facetted by latitude bins from 1982 to 2020. Red means high upwelling percentage (~95%) , blue means low upwelling percentage (~0%), and green is the average upwelling percentage (~50%). This plot segments the previous plot into four latitude bins: [40°N, 43.5°N], [43.5°N, 46.126°N], [46.125°N, 47.625°N], and [47.625°N, 50°N].</em></p>
+<p>Overall, there is extremely high upwelling percentages (~95%) during the upwelling months at the 40°N ~ 43.5°N latitude bin and lower upwelling percentages as latitude increases. In the northern latitudes, there are some years with high upwelling percentage, but they are not as common as in the southern latitudes.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/heatmap-upwelling-percentage-latitude-month.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 9: Heatmap of upwelling percentage by latitude and month from 1982 to 2020. Red means high upwelling percentage (~95%) , blue means low upwelling percentage (~0%), and green is the average upwelling percentage (~50%).</em></p>
+<p>This plot confirms the above findings of a consistent upwelling pattern from June to October and higher upwelling percentages in the lower latitudes (40°N ~ 45°N). Interestingly, there is a glimmer of high upwelling percentage around 48.0°N from August to September. This latitude is same as the latitude where in the 1980s and 2010s, upwelling percentage was observed to be around 35%.</p>
+</section>
+<section id="changes-in-upwelling-phenology-and-duration" class="level4" data-number="5.0.3">
+<h4 data-number="5.0.3" class="anchored" data-anchor-id="changes-in-upwelling-phenology-and-duration"><span class="header-section-number">5.0.3</span> Changes in Upwelling Phenology and Duration</h4>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/first-day-upwelling.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 10: Heatmap showing the first day of upwelling off the coast of Vancouver Island and Washington. Red squares signify later upwelling days (late September) and blue squares earlier days (June). White squares indicate missing values. Heatmap showing the last day of upwelling is placed in the Appendix since it shows no clear pattern.</em></p>
+<p>The plot above shows that the first day suggesting a coastal upwelling process by our automatic detection method was from June to October. Overall, upwelling started later for the northern latitudes (45.0°N ~ 50.0°N) than the southern latitudes (40.0°N ~ 45.0°N). There is a band of latitudes around the late 1990s and late 2000s when the first day of upwelling was late September. Also, around 48.0°N, the first day of upwelling is much earlier (June) than the surrounding latitudes, where the first day of upwelling was in August.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/duration-upwelling.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p><em>Figure 11: Heatmap showing the duration of upwelling off the coast of Vancouver Island and Washington. Red squares indicate short upwelling duration (~10 days) and blue squares long upwelling duration (~150 days). White squares indicate missing values.</em></p>
+<p>Overall, southern latitudes (40.0°N ~ 45.0°N) show longer duration of upwelling. This is natural since the previous plot showed that in the southern latitudes, upwelling started earlier than the northern latitudes. There are some northern latitudes with short duration of upwelling. Around 50.0°N and 47.5°N, the duration of upwelling is shorter than its surrounding latitudes. In 1997, a shorter duration of upwelling was observed at 45.0°N ~ 47.5°N than surrounding years.</p>
+</section>
+<section id="discussion" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="discussion"><span class="header-section-number">5.1</span> Discussion</h3>
+<p>Our automatic detection method mainly draws inspiration from <span class="citation" data-cites="gidhagen_coastal_1987">Gidhagen (<a href="#ref-gidhagen_coastal_1987" role="doc-biblioref">1987</a>)</span>. Gidhagen determined a coastal upwelling process with “an abnormal temperature drop of at least 2°C compared to earlier and surrounding measurements”. This revealed that in the Baltic Sea, the range of the temperature drop for upwelling events is 2-10°C and a typical drop is 4-5°C. Our method uses a threshold of 2.5°C, which is optimal for reducing noise. While Gidhagen compares the current coastal temperature in two dimensions, time and location, we only look at one dimension, comparing the coastal SST to the SST that are 2 and 3 degrees away.</p>
+<p>Eleven years later, <span class="citation" data-cites="naidu_time_1999">Naidu, Ramesh Kumar, and Ramesh Babu (<a href="#ref-naidu_time_1999" role="doc-biblioref">1999</a>)</span> studied monsoonal upwelling along the west and east coasts of India using monthly mean local temperature anomaly (LTA). LTA is defined as the diffference between coastal and mid-ocean sea surface temperatures (SST). Specifically, they calculate two LTAs, one on the west coast (<span class="math inline">\(LTA_W\)</span>) and another on the east coast (<span class="math inline">\(LTA_E\)</span>).</p>
+<p><span class="math display">\[\begin{align}
+LTA_W &amp;= T_{64}-T_{\text{west coast}} \text{(along the same latitude belt)} \\
+
+LTA_E &amp;= T_{90}-T_{\text{east coast}} \text{(along the same latitude belt)}
+
+\end{align}\]</span></p>
+<p>In the Arabian Sea, they used “64°E (<span class="math inline">\(T_{64}\)</span>) for representing the mid-ocean conditions whereas for the Bay of Bengal we used the 90°E (<span class="math inline">\(T_{90}\)</span>) for the open ocean conditions”. Positive LTA values indicate coastal upwelling process.</p>
+<p>Ten years later, <span class="citation" data-cites="smitha_upwelling_2008">Smitha et al. (<a href="#ref-smitha_upwelling_2008" role="doc-biblioref">2008</a>)</span> also used LTA as an upwelling index.</p>
+<p>LTA is calculated as</p>
+<p><span class="math display">\[\begin{align}
+
+LTA_{wc} &amp;= T_{lon - 3}-T_{\text{lon}} \text{(along the south-west coast)} \\
+
+LTA_{kk} &amp;= T_{lat - 3}-T_{\text{lat}} \text{(Off Kanyakumari)}
+
+\end{align}\]</span></p>
+<p><span class="math inline">\(T_{\text{lat}}\)</span> and <span class="math inline">\(T_{\text{lon}}\)</span> refer to the coastal stations between 8.5° - 14.5° N and 76.5° - 78.5°E and <span class="math inline">\(T_{lon - 3}\)</span> and <span class="math inline">\(T_{\text{lat} - 3}\)</span> refer to SST 333 km from the coast. <span class="math inline">\(LTA_{wc}\)</span> and <span class="math inline">\(LTA_{kk}\)</span>, respectively, represent local temperature along the south-west coast and the Kanyakumari coast. The positive LTA values suggest coastal upwelling process.</p>
+<p>Most recently, <span class="citation" data-cites="holmes_improving_2021">Holmes et al. (<a href="#ref-holmes_improving_2021" role="doc-biblioref">2021</a>)</span> used SST differential to study upwelling in the Southeast Arabian Sea, one of the world’s important seasonal upwelling zones. For their SST data, they used the same source as this blogpost, the Daily Optimum Interpolation (OI), version 2.1 data set by the Group for High Resolution Sea Surface Temperature (GHRSST). “This data set uses Advanced Very High Resolution Radiometer (AVHRR) data, which provides accurate nearshore SST values, and interpolates to fill in gaps in the AVHRR data”. Their upwelling index is “the SST differential between nearshore and 3° longitude offshore, based on <span class="citation" data-cites="naidu_time_1999">Naidu, Ramesh Kumar, and Ramesh Babu (<a href="#ref-naidu_time_1999" role="doc-biblioref">1999</a>)</span> and <span class="citation" data-cites="smitha_upwelling_2008">Smitha et al. (<a href="#ref-smitha_upwelling_2008" role="doc-biblioref">2008</a>)</span>.” This index is good for measuring “upwelling arising due to both remote-forcing and local wind stress.”</p>
+<p><span class="citation" data-cites="hickey_oceanography_2003">Hickey and Banas (<a href="#ref-hickey_oceanography_2003" role="doc-biblioref">2003</a>)</span> reveals that “In general, the strength and duration of upwelling increases to the south in the PNW”. They define strength of upwelling with wind velocity, whereas we look to upwelling percentage. Figure 8 and Figure 9 clearly confirm this finding as they illustrate upwelling percentage is much higher in the lower latitudes in the PNW, 40.0°N ~ 45.0°N, than the higher latitudes, 45.0°N ~ 50.0°N. In fact, Figure 6 shows that this has been the case over several decades since the 1980s.</p>
+<p>Also, they mention that maximum upwelling happens in spring and summer. Our automatic detection method shows that the upwelling months (months with upwelling percentage &gt; 25%) are from June to October. This means upwelling months start later in the summer and end later in the Fall than Hickey and Banas’ assertion.</p>
+<p>Finally, Hickey and Banas write, “the duration of coastal upwelling also decreases seasonally towards the north”. Figure 11 illustrates this point, as it shows that duration of upwelling is around 150 days at 40.0°N ~ 45.0°N, and decreases to around 100 days for northern latitudes, 45.0°N ~ 50.0°N.</p>
+<p><span class="citation" data-cites="bograd_phenology_2009">Bograd et al. (<a href="#ref-bograd_phenology_2009" role="doc-biblioref">2009</a>)</span> develop a set of indexes to understand the coastal upwelling in the California Current large marine ecosystem (CCLME). They found that coastal upwelling gets “progressively shorter with northward latitude”. In Table 1, they show that the mean duration of upwelling is 357 days at 33.0°N, 320 days at 36°N, 223 days at 42°N, and 151 days at 48°N. This finding agrees with our Figure 11, which shows northern latitudes with shorter duration of upwelling. One difference is Bograd et al only looked at data up to 2007, whereas our dataset looks up to 2020.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6</span> Conclusion</h2>
+<p>Upwelling is the upward movement of deep, cold water caused by wind blowing parallel to the coastline. We designed a custom automatic detection method using SST differential to accurately identify when and where upwelling occurs. We discovered that monthly averages of Ekman upwelling index has a statistically significant relationship with the upwelling indicator, which were determined by our automatic detection method.</p>
+<p>Using these indicators, we calculated the upwelling percentage, the proportion of days over relevant timeframe in a figure that are categorized as upwelling by our automatic detection method. We discovered that southern latitudes (40°N ~ 45°N) had higher upwelling percentages than northern latitudes (45°N ~ 50°N). There was extremely high upwelling percentage, close to 50%, from 40°N to 42.5°N. Also, we found the upwelling months (upwelling percentage higher than 25%) to be from June to October and the non-upwelling months from November to May. High upwelling percentage (~95%) was observed from August to October.</p>
+<p>We then looked at the changes in upwelling phenology and focused on the upwelling months. Upwelling started later for northern latitudes (45.0°N to 50.0°N) around August and September. In the southern latitudes, upwelling started around July 1st. Northern latitudes had shorter duration of upwelling than the southern latitudes.</p>
+<p><br></p>
+</section>
+<section id="appendix" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="appendix"><span class="header-section-number">7</span> Appendix</h2>
+<p><img src="img/lineplot-facet-by-decade-dotted.png" class="img-fluid"></p>
+<p><em>Figure 12: Lineplots of upwelling percentage over four decades. The 2020s has been omitted for lack of data.</em></p>
+<p><img src="img/lineplot-facet-by-year-dotted.png" class="img-fluid"></p>
+<p><em>Figure 13: Lineplots of upwelling percentage from 1982 to 2020.</em></p>
+<p><img src="img/lineplot-facet-by-month-dotted.png" class="img-fluid"></p>
+<p><em>Figure 14: Lineplots of upwelling percentage of each month from 1982 to 2020.</em></p>
+<p><img src="img/last-day-of-upwelling.png" class="img-fluid"></p>
+<p><em>Figure 15: Heatmap showing the last day of upwelling off the coast of Vancouver Island and Washington. Red squares signify later upwelling days (late September) and blue squares earlier days (June). White squares indicate missing values.</em></p>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-bograd_phenology_2009" class="csl-entry" role="doc-biblioentry">
+Bograd, Steven J., Isaac Schroeder, Nandita Sarkar, Xuemei Qiu, William J. Sydeman, and Franklin B. Schwing. 2009. <span>“Phenology of Coastal Upwelling in the <span>California</span> <span>Current</span>.”</span> <em>Geophysical Research Letters</em> 36 (1). <a href="https://doi.org/10.1029/2008GL035933">https://doi.org/10.1029/2008GL035933</a>.
+</div>
+<div id="ref-gidhagen_coastal_1987" class="csl-entry" role="doc-biblioentry">
+Gidhagen, Lars. 1987. <span>“Coastal Upwelling in the <span>Baltic</span> <span>Sea</span>—<span>Satellite</span> and in Situ Measurements of Sea-Surface Temperatures Indicating Coastal Upwelling.”</span> <em>Estuarine, Coastal and Shelf Science</em> 24 (4): 449–62. <a href="https://doi.org/10.1016/0272-7714(87)90127-2">https://doi.org/10.1016/0272-7714(87)90127-2</a>.
+</div>
+<div id="ref-hickey_oceanography_2003" class="csl-entry" role="doc-biblioentry">
+Hickey, Barbara M., and Neil S. Banas. 2003. <span>“Oceanography of the <span>U</span>.<span>S</span>. <span>Pacific</span> <span>Northwest</span> <span>Coastal</span> <span>Ocean</span> and Estuaries with Application to Coastal Ecology.”</span> <em>Estuaries</em> 26 (4): 1010–31. <a href="https://doi.org/10.1007/BF02803360">https://doi.org/10.1007/BF02803360</a>.
+</div>
+<div id="ref-holmes_improving_2021" class="csl-entry" role="doc-biblioentry">
+Holmes, Elizabeth Eli, Smitha Br, Kumar Nimit, Sourav Maity, David M. Checkley, Mark L. Wells, and Vera L. Trainer. 2021. <span>“Improving Landings Forecasts Using Environmental Covariates: <span>A</span> Case Study on the <span>Indian</span> Oil Sardine (<span>Sardinella</span> Longiceps).”</span> <em>Fisheries Oceanography</em> n/a (n/a). <a href="https://doi.org/10.1111/fog.12541">https://doi.org/10.1111/fog.12541</a>.
+</div>
+<div id="ref-lehmann_statistical_2012" class="csl-entry" role="doc-biblioentry">
+Lehmann, Andreas, Kai Myrberg, and Katharina Höflich. 2012. <span>“A Statistical Approach to Coastal Upwelling in the <span>Baltic</span> <span>Sea</span> Based on the Analysis of Satellite Data for 1990–2009.”</span> <em>Oceanologia</em> 54 (3): 369–93. <a href="https://doi.org/10.5697/oc.54-3.369">https://doi.org/10.5697/oc.54-3.369</a>.
+</div>
+<div id="ref-naidu_time_1999" class="csl-entry" role="doc-biblioentry">
+Naidu, P. Divakar, M. R. Ramesh Kumar, and V. Ramesh Babu. 1999. <span>“Time and Space Variations of Monsoonal Upwelling Along the West and East Coasts of <span>India</span>.”</span> <em>Continental Shelf Research</em> 19 (4): 559–72. <a href="https://doi.org/10.1016/S0278-4343(98)00104-6">https://doi.org/10.1016/S0278-4343(98)00104-6</a>.
+</div>
+<div id="ref-smitha_upwelling_2008" class="csl-entry" role="doc-biblioentry">
+Smitha, B. R., V. N. Sanjeevan, K. G. Vimalkumar, and C. Revichandran. 2008. <span>“On the Upwelling of the Southern Tip and Along the West Coast of <span>India</span>.”</span> <em>Journal of Coastal Research</em> 24 (4C): 95–102.
+</div>
+<div id="ref-xiu_future_2018" class="csl-entry" role="doc-biblioentry">
+Xiu, Peng, Fei Chai, Enrique N. Curchitser, and Frederic S. Castruccio. 2018. <span>“Future Changes in Coastal Upwelling Ecosystems with Global Warming: <span>The</span> Case of the <span>California</span> <span>Current</span> <span>System</span>.”</span> <em>Scientific Reports</em> 8 (1): 2866. <a href="https://doi.org/10.1038/s41598-018-21247-7">https://doi.org/10.1038/s41598-018-21247-7</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

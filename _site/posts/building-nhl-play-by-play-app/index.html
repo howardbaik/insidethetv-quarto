@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.245">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Howard Baek">
+<meta name="dcterms.date" content="2019-02-04">
+<meta name="description" content="I will walk through a month-long process building the National Hockey League Play-by-Play App from scratch, giving a behind-the-scenes look.">
+
+<title>Howard Baek - Building the NHL PBP App in Shiny</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Howard Baek</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/howardbaek"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/howard_baek"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Building the NHL PBP App in Shiny</h1>
+                  <div>
+        <div class="description">
+          I will walk through a month-long process building the National Hockey League Play-by-Play App from scratch, giving a behind-the-scenes look.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Data Visualization</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Howard Baek </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 4, 2019</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>I created a web application for interactively visualizing shot data for all games in the 2017-2018 season. In this article, I will walk through a month-long process building the <a href="https://howiebaek.shinyapps.io/nhl-pbp/">National Hockey League Play-by-Play App</a> from scratch, giving a behind-the-scenes look.</p>
+</section>
+<section id="the-process" class="level2">
+<h2 class="anchored" data-anchor-id="the-process">The Process</h2>
+<p>What started this project was this <a href="https://twitter.com/rstudio/status/1082349589922041858">#rstats Shiny contest tweet</a>. Shiny is a R package built by RStudio for creating interactive web applications. It allows R programmers to create web applications without having to exclusively code in HTML, CSS or JavaScript. I had looked at several sports visualizations (e.g.&nbsp;<a href="https://ryo-n7.github.io/2018-07-24-visualize-worldcup-part-3/">Ryo’s Visualize the World Cup</a>) and wanted to create something similar in hockey. This announcement provided the motivation for me to start.</p>
+<p>I started sharpening my Shiny skills by taking <a href="https://www.datacamp.com/courses/building-web-applications-in-r-with-shiny">DataCamp’s Shiny Course</a>. I particularly found Chapter 2 (Inputs, outputs, and rendering functions) and Chapter 3 (Reactive Programming) helpful in reminding myself of the essence of Shiny. They are great visual learning resources and I highly recommend beginners in Shiny take this course.</p>
+<p>Now, I focused on the structure of my application. The organization of a product is instrumental in its usability, so I wanted to get it right. I looked at the <a href="https://shiny.rstudio.com/articles/layout-guide.html">Shiny Application Layout Guide</a> and decided to go with the Grid Layout, which contains a plot at the top and parameters of the plot at the bottom in a three column format. This is the best organization for focusing the users on the animation at the top. The secondary features, which are the parameters controlling the plot, are stationed at the bottom.</p>
+<p>Now, to the animation. I relied on Ryo’s World Cup animations, which was rendered in <a href="https://gganimate.com/">gganimate</a>, a R package for animations compatible with <code>ggplot2</code>. Unfortunately, unlike Ryo’s dataset, my dataset doesn’t contain coordinate data points with the location of each player over time. Rather, my Play-by-Play, Real Time Scoring System dataset contains shot location:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/shot-location-table.png" width="620" height="180" class="figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 1: Snapshot of raw shot data by Corsica</figcaption><p></p>
+</figure>
+</div>
+<p>If the NHL had tracked real time coordinate data like the NFL, I could have created a fluid animation like <a href="http://bit.ly/nfl-bigdata">this</a>:</p>
+<p align="center">
+</p><div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/nfl-bigdata-bowl.gif" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 2: Tyreek Hill’s TD reception during Week 1 of 17/18 season</figcaption><p></p>
+</figure>
+</div>
+<p></p>
+<p>So, here is a hack I came up with. First, I’ve normalized the shot locations so that all shots taken by the home team were shown on the right and shots taken by the away team were shown on the left. Then, after every shot location data, I input (x,y) coordinates (82, 0) and (-82, 0) to mark the location of both nets. Next, I created a column called event_index that groups each pair of shot data (1 row for shot location, 1 row for net location). I then created a column called event_frame that numerates all the rows. Last, I used group aesthetic on event_index and added <a href="https://gganimate.com/reference/transition_components.html">transition_components(time = event_frame)</a> to render the animation.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/animation-processed-table.png" width="620" height="180" class="figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 3: Data Processed for animation</figcaption><p></p>
+</figure>
+</div>
+<p>This was all great, but I realized that the gganimate package doesn’t yet work with Shiny. There is no function designed to render gganimate animations on Shiny. In other words, there was no natural way to put my animations on my end product, which was a huge concern.</p>
+<p>This <a href="https://stackoverflow.com/questions/35421923/how-to-create-and-display-an-animated-gif-in-shiny">StackOverflow answer</a> was super helpful in coming up with another <em>hack</em>. It recommended saving the animation as a .gif file and returning the file as a list along with the dimensions of the animation. There is one drawback to this method though: the animation looks stretched out if I increase the width too much, and it moves downward if I increase the height too much. As a result, what I currently have is the best I could come up with: high image resolution and optimal placement.</p>
+<p>The animation happens on a NHL ice rink created by War On Ice. I added “reactive” team logos on Shiny to clearly indicate which side is the home/away side. Also, in the app, users need to input the official game ID in order to navigate between games. In order to facilitate this process, I included a datatable of all the game IDs, game dates, home teams, and away teams next to the animation. That way, the user can find the desired game by searching through game dates or teams, locate the right Game ID, and render the right animation.</p>
+<p align="center">
+</p><div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/example-shot-animation.gif" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 4: Animation of a Regular Season Game between the Toronto Maple Leafs and the Winnipeg Jets</figcaption><p></p>
+</figure>
+</div>
+<p></p>
+<p>Now, the other visualizations. I took a long, hard look at the dataset and thought about which columns to make use of. I thought the shot distance was pretty interesting, so I created a histogram of the shot distance. This illustrates the number of shots a team took at a certain distance from the net. To help the user interpret the distances, I labelled the location of the faceoff circles, blue line, and the red line. Furthermore, expected goal probability is a frequently occuring metric in hockey analytic discussions. I thought it would be interesting to see its change throughout the game. As a result, I animated expected goal probabilities for each team. This plot generated the most buzz.</p>
+<p align="center">
+</p><div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/goal-prob-anim.gif" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 5: Animation of Expected Goal Probability during a Regular Season Game between the Toronto Maple Leafs and the Winnipeg Jets</figcaption><p></p>
+</figure>
+</div>
+<p></p>
+<p>Last, I wanted to include a summary of the game by showing the boxscore. However, I ran into too many roadblocks with html / css, so I decided to simply show the nhl.com official recap.</p>
+<p>Some neat features I added to the app include a short tour using the rintrojs package. When the user presses the Help bottom on the top right corner, Shiny gives a short tour, explaining what each of the parameters do. Also, the “Share” button allows users to easily share the app with a custom message I included and the “Code” button redirects users to the Github repo.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/rintrojs-example.gif" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure 6: Illustration of the rintrojs package</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="result" class="level2">
+<h2 class="anchored" data-anchor-id="result">Result</h2>
+<p>The final product is available here: <a href="https://howiebaek.shinyapps.io/nhl-pbp/">NHL Play-by-Play App</a></p>
+<p>Update: This app received a Honorable Mention from <a href="https://blog.rstudio.com/2019/04/05/first-shiny-contest-winners/?utm_content=buffere0bd9&amp;utm_medium=social&amp;utm_source=twitter&amp;utm_campaign=buffer">RStudio’s 1st Shiny Contest</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

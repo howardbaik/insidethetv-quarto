@@ -1,0 +1,4 @@
+- source: project
+  netlify:
+    - id: 423b56fa-39a0-4cca-8c29-97a5d0d9162e
+      url: 'https://howardbaek.com'

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.245">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Howard Baek">
+<meta name="dcterms.date" content="2018-06-28">
+<meta name="description" content="Discovery and Temporal Analysis of Latent Study Patterns in MOOC Interaction Sequences">
+
+<title>Howard Baek - Summary of an Educational Data Mining Paper</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Howard Baek</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/howardbaek"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/howard_baek"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Summary of an Educational Data Mining Paper</h1>
+                  <div>
+        <div class="description">
+          Discovery and Temporal Analysis of Latent Study Patterns in MOOC Interaction Sequences
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Research</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Howard Baek </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 28, 2018</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This is a summary of the paper, <a href="https://infoscience.epfl.ch/record/232491">Discovery and Temporal Analysis of Latent Study Patterns in MOOC Interaction Sequences</a>, written by <a href="https://www.linkedin.com/in/mina-shirvani-boroujeni-b0574885/">Mina Shirvani Boroujeni</a>, who at the time was a PhD Candidate at EPFL but has now become a Data Scientist at Expedia Group in Switzerland, and <a href="https://www.linkedin.com/in/pierre-dillenbourg-060171/">Pierre Dillenbourg</a>, Professor of Learning Technologies at EPFL.</p>
+<p>Previously, the authors have looked into <a href="http://www.educationaldatamining.org/EDM2016/proceedings/paper_94.pdf">learners’ online participation patterns across time</a>, studied patterns in timing of study sessions and methods to quantify regularity and <a href="https://infoscience.epfl.ch/record/223718/files/LAK2017_Forum_Dynamics.pdf">social dimensions</a> (researched evolution of social interactions and changes in learners’ roles in MOOC discussion forums over time).</p>
+</section>
+<section id="purpose-of-paper" class="level2">
+<h2 class="anchored" data-anchor-id="purpose-of-paper">Purpose of paper</h2>
+<p>According to the researchers, they “investigate MOOC study patterns and perform temporal analysis of learners’ longitudinal behaviors… we aim to identify learners’ study patterns during assessment periods, that is their learning sequences from the opening time of an assignment until the submission deadline”.</p>
+<blockquote class="blockquote">
+<p>Research question: What are the different study patterns exhibited by learners during MOOCs assessment periods and how do learners’ study patterns evolve over time?*</p>
+</blockquote>
+</section>
+<section id="dataset" class="level2">
+<h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
+<p>The researchers used data of the interaction logs of students in <em>Functional Programming Principles in Scala</em> which is an undergraduate engineering MOOC (Massive Open Online Course) produced by EPFL University, a university in Switzerland. The course contains seven video lectures and six assignments where “assessment periods (assignment release to hard deadline) varied between 11 to 18 days”. Also, “the dataset includes three categories of events, describing learners??? interaction with videolectures (play, pause, download, seek, change speed), assignments(submit) and discussion forums (read, write, or vote a message)”</p>
+<section id="data-preprocessing" class="level3">
+<h3 class="anchored" data-anchor-id="data-preprocessing">Data Preprocessing</h3>
+<p>The researchers split the full time period of interaction logs into “subsequences corresponding to each assessment period”. They filtered out learners who were inactive (active in less than three assessment periods). AS a result, the study contains “interaction subsequences of 7527 learners”.</p>
+</section>
+</section>
+<section id="hypothesis-driven-method" class="level2">
+<h2 class="anchored" data-anchor-id="hypothesis-driven-method">Hypothesis-Driven Method</h2>
+<p>This method involves the researchers labelling each students’ activity sequences and then performing clustering.</p>
+<p>In order to identify patterns, the researchers categorized the sub-sequences according to two criteria:</p>
+<ol type="1">
+<li>Whether the learner starts off by watching a video or submitting an assignment</li>
+<li>Whether the learner submits the assignment before the deadline.</li>
+</ol>
+<p>These two criteria yielded the following study patterns:</p>
+<ul>
+<li>V_start: Learner watched the video(s) before submitting the assignment</li>
+<li>A_start: Learner submitted the assignment without having watched the corresponding video(s)</li>
+<li>Audit: Learner watched the video(s) but did not submit the assignment</li>
+<li>Inactive: Learner did not watch the video(s) and did not submit the assignment.</li>
+</ul>
+<p>Then, the researchers went on to apply <em>hierarchial agglomerative clustering</em> to extract different patterns of learner profiles. .</p>
+<section id="results" class="level3">
+<h3 class="anchored" data-anchor-id="results">Results:</h3>
+<p><em>Study pattern distribution:</em></p>
+<ul>
+<li><p>69% = learners watch videos before submitting an assignment.</p></li>
+<li><p>10% = learners skip video lectures and directly submit assignments.</p></li>
+<li><p>8% to 18% = Auditing students increase towards the end of the course</p></li>
+<li><p>4% to 20% = Proportion of Inactive students increases.</p></li>
+<li><p>Learners who start by watching videos start their learning sequence earlier</p></li>
+<li><p>Interestingly, learners in A_start sessions are less likely to attempt an assignment multiple times and only 6% of A_start learners access lectures after submitting the assignment. Thus, this signifies that A_start learners are likely to know the assignment topic beforehand.</p></li>
+</ul>
+<section id="fixed-study-pattern" class="level4">
+<h4 class="anchored" data-anchor-id="fixed-study-pattern">Fixed Study Pattern:</h4>
+<ul>
+<li><p>Comprises 53% of learners who have identical study patterns.</p></li>
+<li><p>Cluster 1: Comprises 44% of participants who rely on lectures for learning.</p></li>
+<li><p>Cluster 2: Comprises 2% of participants who do not watch the videos before submitting any assignments.</p></li>
+<li><p>Cluster 3: Comprises of <em>auditing</em> students who do not submit any of the assignments, but follow most of the videos.</p></li>
+</ul>
+</section>
+<section id="changing-study-pattern" class="level4">
+<h4 class="anchored" data-anchor-id="changing-study-pattern">Changing Study Pattern:</h4>
+<ul>
+<li><p>Comprises 47% of learners who change their approach at least once during the course.</p></li>
+<li><p>Cluster 4: Mainly Assignment_Start Approach, but in first and last assignments, they watch videos before submitting</p></li>
+<li><p>Cluster 5: Main approach is V_start but skip videos in one or two assignments during course. Interesting point: Start time of learning sequences is closer to assignment deadline, which means proximity of deadline makes them change study approach</p></li>
+<li><p>Cluster 6: Mainly watch videos first but in last two periods, they submit assignments without watching videos. Achieve nearly complete grades in the first four assignments so these learners are likely to receive a high final grade even without receiving the highest score in the reamining assignments. <em>However, more information about learners’ experience and conditions is required to precisely determine the factors triggering changes in learners’ study approaches</em></p></li>
+<li><p>Cluster 7 and 8: Watch the videos in the first few assignments, but then loses motivation. Cluster 7: submits nearly half of the assignments, but Cluster 8: submit only the first one or two, before switching to the auditing state.</p></li>
+<li><p>Clusters 9, 10, 11: Start with V_start approach, change to Audit state, and finally wstop watching videos and drop out. Cluster 9: Submit first four assignments and drop out, but in Cluster 10 and 11: stop doing assignments and eventually drop out.</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="data-driven-method" class="level2">
+<h2 class="anchored" data-anchor-id="data-driven-method">Data-Driven Method</h2>
+<p>This method invovles unsupervised learning to “discover and track latent study patterns from students’ interaction sequences”.</p>
+<p>It consists of four steps: 1) Activity Sequence Modeling 2) Distance computation 3) Clustering (Hierarchial Agglomerative Clustering) 4) Cluster Matching</p>
+<section id="result" class="level3">
+<h3 class="anchored" data-anchor-id="result">Result</h3>
+<p>Identification of 13 different study patterns in Table3.</p>
+<p>Figure 3 = Transition Probabilities between different study patterns. Patterns 10 and 7 are the most predictable study patterns. Pattern 11, <em>inactive learners</em>, is repeatable with a probability of 0.6 Pattern 10 represents a similiar approach to A_start Pattern 7 is the most popular (strongest connections).</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In this paper, Boroujeni and Dillenbourg explore two methods to answer their research question: hypothesis method and data-driven method. The hypothesis method reveals that learning approaches definitely change in different manners. Some change to another method and then revert back to their initial method whereas others permanently switch to the new approach. The data-driven method is an unsupervised learning method that uses “action sequences as input”. This revealed 13 different study patterns. Importantly, this research can be “used for analysis of learners’ activities during the course duration”, opening doors to real-time intervention of students facing difficulties. While this paper seeks to analyze different study patterns and their evolutions, our paper will investigate specific patterns that lead to student dropouts. A similar approach is briefly covered in the paper where Table 1 shows the percentage of students who passed the course. This paper only looks into different study patterns and their evolutions, but does not address student retention with respect to the different study patterns students have. On the other hand, we will focus on the problem of student dropouts from MOOCs and its factors using data mining algorithms such as clustering and classification.</p>
+<p>Our work will directly build on this paper; as mentioned in the Discussion Section, we will capture an overview of the captured behaviors and study pattern sequences into an analytic dashboard to enable intervention and improvement of the course materials by instructors. We will create it with the <a href="https://shiny.rstudio.com/">Shiny package in R</a>. Shiny allows for interactive visualization of data, which will definitely aid instructors in understanding their students and helping those in need.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

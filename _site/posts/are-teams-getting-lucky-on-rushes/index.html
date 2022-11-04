@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.245">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Howard Baek">
+<meta name="dcterms.date" content="2018-06-28">
+<meta name="description" content="When you watch an offensive rush in hockey, do you ever wonder about the numbers behind it?">
+
+<title>Howard Baek - Are Teams getting Lucky on Rushes?</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Howard Baek</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/howardbaek"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/howard_baek"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Are Teams getting Lucky on Rushes?</h1>
+                  <div>
+        <div class="description">
+          When you watch an offensive rush in hockey, do you ever wonder about the numbers behind it?
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Data Analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Howard Baek </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 28, 2018</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>When you watch an offensive rush in hockey, do you ever wonder about the numbers behind it? For example, is the number of shots that were preceded by passes repeatable over an entire season? What about shooting percentages? If repeatable, do zones of the primary pass (the pass preceding a shot) influence this repeatability? What about rebounds and rebound shooting percentages (the goals scored from rebounds)?</p>
+</section>
+<section id="terminology" class="level2">
+<h2 class="anchored" data-anchor-id="terminology">Terminology</h2>
+<p>In hockey, “odd-man rushes” is a term frequently used to refer to offensive attacks such as the above where the attacking team has more players than the defending team. In my analysis, I will be slightly deviating from this jargon and instead use “odd-player rushes”, which consist of shots that were preceded by passes and taken on breakaways, 2-on-1, 3-on-2, etc. Any shots that are not rush shots with a player advantage are categorized as <code>all_other_shots</code>.</p>
+<p>In the later parts of this analysis, I will be using the terms, “rebound shot” and “rebound shooting percentage”. The first indicates a shot on goal following a rebound and the second is calculated as rebound goals (goals that follow rebounds) divided by rebound shots.</p>
+</section>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>To investigate these questions, I will be using the Passing Project Data from the 2015~2018 NHL seasons organized by <a href="https://twitter.com/RK_Stimp">Ryan Stimson</a> and <a href="https://twitter.com/ShutdownLine">Corey Sznajder</a>. The data was collected by a group of volunteers who tracked <strong>every pass leading to a shot.</strong> According to Ryan’s <a href="http://www.sloansportsconference.com/wp-content/uploads/2017/02/1614.pdf">MIT Sloan Sports Analytics Conference paper</a>, “Each tracker was required to complete 2 - 3 training games for validation by the project leader to ensure consistency in classification of passes and recording of data. Occasional spot-checking of games was also conducted.”</p>
+<p>There are 44 variables and over 150,000 observations in this dataset. Some notable metrics that I will be using for my analysis include <code>shot_on_goal</code> (1 for yes and 0 for no), <code>goal</code> (1 for yes and 0 for no), <code>odd_man</code> (number of players involved in player advantages during rushes), <code>shooting_percentage</code> (number of goals / number of shots on goals), <code>shot_type</code> (one-timer, slap shot, wrist/snap shot, backhand, etc), <code>a1_zone</code> (zone that the primary assist originated), and <code>rebound_shot_on_goal</code> (if a rebound occured and resulted in a shot on goal).</p>
+<p>Many researchers have used this dataset to explore interesting research topics in hockey. For example, <a href="http://www.sloansportsconference.com/wp-content/uploads/2017/02/1614.pdf">Ryan Stimson’s paper</a> discusses repeatability of certain metrics on a team level and player level. Among other analysis, <a href="https://www.nhlnumbers.com/2016/08/10/passing-project-dangerous-primary-shot-contributions">this NHL Numbers post</a> covers repeatability of passes that crosses through the royal road (the line that goes directly through the middle of the ice from one net to the other) and provides visualizations.</p>
+<p>In this analysis, I will look at repeatability of shots that were preceded by passes and taken during rushes with player advantages, shooting percentages, rebound shots, and rebound shooting percentages in <strong>5v5 situations.</strong></p>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<p>My main analysis tools are <strong>scatterplots</strong> and <strong>linear regression lines</strong>. I use linear regression to examine the relationship between first-half statistics (x-axis on all plots below) and second-half statistics (y-axis on all plots below) within the same seasons at the team level. To do this, I split each of the 2015-16, 2016-17, and 2017-18 seasons into first-half (before Jan 1st) and second-half (after Jan 1st) and then calculated the quantities of interest at the team level within each half-season. I then matched up the team statistics from each half-season with its counterpart (e.g.&nbsp;Vancouver’s 2016-17 first-half statistics with Vancouver’s 2016-17 second-half statistics).</p>
+<p>I utilized <a href="http://hadley.nz/">Hadley Wickham’s</a> <code>ggplot2</code> package, a <a href="https://ggplot2.tidyverse.org/">“system declaratively creating graphics, based on The Grammar of Graphics”</a> to plot this information on a scatterplot and layered the regression line on each graph. I included 95% confidence bands, which provide a confidence interval on the slope of the regression line. In other words, we are 95% confident that the true regression line falls within the confidence bands, given the data we observed.</p>
+<ul>
+<li>If I can draw a horizontal line completely within the confidence bands, this means there exists a regression line with a slope of 0 within the 95% confidence band. This indicates that there is <strong>no significant relationship</strong> between the x-variable and the y-variable.</li>
+<li>If I <strong>cannot</strong> draw a horizontal line completely within the confidence bands, this means that a regression line with a slope of 0 falls outside the 95% confidence band. In other words, there is <strong>a significant relationship</strong> between the x-variable and the y-variable.</li>
+</ul>
+<p>In each of the graphs below, there are three logos of each team, corresponding to each of the three seasons in the data. In terms of the linear regression graphs, the x-variable is a statistic from the first half of the season and the y-variable is a statistic from the second half of the season. As a result, we are really examining the relationship between the past and future of a statistic, or the <em>repeatability</em> of a statistic.</p>
+</section>
+<section id="repeatability-of-odd-man-rush-shots" class="level2">
+<h2 class="anchored" data-anchor-id="repeatability-of-odd-man-rush-shots">Repeatability of Odd-Man Rush Shots</h2>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li>Shots that were preceded by passes and taken on odd player rushes are not repeatable over a season; this signifies that <strong>the number of odd-player rush shots per game in the first half is not a good predictor of the number of odd-player rush shots per game in the second half.</strong></li>
+<li>However, all other shots that were preceded by passes are repeatable, meaning that <strong>the number of shots per game in the first half is a good predictor of the number of shots per game in the second half.</strong></li>
+</ul>
+<blockquote class="blockquote">
+<p>These findings suggest that hockey management and coaches must not read too much into the (lack of) offensive opportunities during odd player rushes in the first half; the second half presents a whole new playing field for players when it comes to odd player rushes.</p>
+</blockquote>
+</section>
+<section id="repeatability-of-shooting-percentage" class="level2">
+<h2 class="anchored" data-anchor-id="repeatability-of-shooting-percentage">Repeatability of Shooting Percentage</h2>
+<p><em>The below analysis on shooting percentages is parallel to the argument presented by Adam Gretz in <a href="https://www.cbssports.com/nhl/news/the-roller-coaster-world-of-nhl-shooting-percentages/">“The roller coaster world of NHL shooting percentages”</a>. Gretz opens the article with this statement: “A player’s shooting percentage in a given season has more to do with his luck as a shooter than his skill or the way he’s actually playing.” Furthermore, he claims, “They’re a wild roller coaster ride from year to year (and even during the season) that are always going up and down.”</em></p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li>The scales for the two facetted graphs are vastly different: shooting percentages across the whole season are <em>significantly higher</em> in odd player rushes than <em>all other shots</em>. This discrepancy makes sense when we consider the offensive freedom players have during odd player rushes.</li>
+<li>Unlike shots per game played, shooting percentages for <em>all other shots</em> are not repeatable over a season.</li>
+<li>Like shots per game played, shooting percentages are not repeatable during odd player rushes, which means that teams that have had extremely low shooting perentages in the first half may not have a similar second half. On the other hand, teams with extremely high shooting percentages in the first half may not enjoy this in the second half!</li>
+</ul>
+<blockquote class="blockquote">
+<p>These results confirm Gretz’s argument: “You just can’t count on a player to repeat or maintain a consistent shooting percentage, especially one that’s extremely high or, on the other end of the spectrum, extremely low.”</p>
+</blockquote>
+</section>
+<section id="repeatability-of-shooting-percentages-by-zone-of-primary-pass" class="level2">
+<h2 class="anchored" data-anchor-id="repeatability-of-shooting-percentages-by-zone-of-primary-pass">Repeatability of Shooting Percentages by Zone of Primary Pass</h2>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li>None of these graphs show any signs of repeatability since I can draw a horizontal line through all these graphs.</li>
+<li>Thus, the lane of a primary pass does not help explain the discrepancy in repeatability of shooting percentages.</li>
+</ul>
+<blockquote class="blockquote">
+<p>This tells us that set plays are not going to yield consistent results. For example, a premeditated faceoff play, which involves a primary pass from the same lane everytime, is not going to yield the same proportion of goals from the first half to the second half.</p>
+</blockquote>
+</section>
+<section id="repeatability-of-rebound-shots-per-gp" class="level2">
+<h2 class="anchored" data-anchor-id="repeatability-of-rebound-shots-per-gp">Repeatability of Rebound Shots per GP</h2>
+<p><em>Hockey literature reveals that “goalies generally do not have an ability to control rebounds” <a href="https://www.nhlnumbers.com/2013/7/15/can-goalies-control-the-number-of-rebounds-they-allow">(Pettapiece, 2018)</a>. This accounts for the unpredictability of rebounds over a season.</em></p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li>This graph shows that rebound shots are not repeatable over a given season; there is no significant association between first half and second half rebound shots per GP and any association is minor.</li>
+</ul>
+<blockquote class="blockquote">
+<p>This suggests that rebounds are intrinsically hard to predict over an entire season. Teams face different styles of goaltenders and even different goaltenders if the team plays its backup or AHL goaltender. This graph seems to provide a new perspective, as it contradicts the findings of Schuckers’ 2016 paper: <a href="http://myslu.stlawu.edu/~msch/sports/StatEvalofGoalies2016Schuckers.pdf">“Statistical Evaluation of Ice Hockey Goaltending”</a>. Using 2009-2010, 2010-2011, 2011-2012, and 2012-2013 data, he suggests that “past rebound rates are not strongly predictive of future rates though they are consistent within a given season.” The above graph illustrates that rebound rates are not “consistent within a given season”.</p>
+</blockquote>
+</section>
+<section id="repeatability-of-rebound-shooting-percentage" class="level2">
+<h2 class="anchored" data-anchor-id="repeatability-of-rebound-shooting-percentage">Repeatability of Rebound Shooting Percentage</h2>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<ul>
+<li>Overall, rebound shooting percentages are not repeatable since I can draw a horizontal line through the confidence band.</li>
+<li>As can be seen in the graph below, the sample size (rebound shot on goal) is small and thus, I caution the reader from drawing a strong conclusion.</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="key-takeaways">Key Takeaways</h2>
+<ul>
+<li><p>A team’s rate of odd man rush shots that were preceded by passes is not repeatable within seasons</p></li>
+<li><p>A team’s rate of shots in other situations that were preceded by passes is repeatable within seasons.</p></li>
+<li><p>Shooting percentages across the whole season are significantly higher in odd player rushes.</p></li>
+<li><p>Shooting percentages during odd player rushes and other situations are not repeatable within seasons.</p></li>
+<li><p>The lane of a primary pass does not lead to a discrepancy in repeatability of shooting percentages.</p></li>
+<li><p>Rebound shots are not repeatable over a given season. Furthermore, rebound shooting percentages (rebound goals <em>(goals scored from rebounds)</em> divided by rebound shots) are not repeatable.</p></li>
+</ul>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Hockey is an unpredictable sport. This signifies that a team that may have a horrible record before January 1st still can bounce back to become one of the league’s best teams. Just ask the <a href="https://www.azcentral.com/story/sports/nhl/coyotes/2018/04/08/tale-two-seasons-how-coyotes-turned-around-second-half/497308002/">2018 Arizona Coyotes</a>. On Dec 31st, the Coyotes were 9-26-5 and were last in the league. “But since Feb.&nbsp;8, only four NHL teams had more points than Arizona over than span.” The conclusion drawn from this analysis of different offensive statistics helps explain the resurgence of the Arizona Coyotes in the second half.</p>
+<p>I would like to thank Sam Ventura for his valuable advice.</p>
+<p><a href="https://github.com/howardbaek/insidethetv-code/blob/master/are-teams-getting-lucky-nhl.Rmd">Code</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,185 @@
+---
+title: "Wine Quality Prediction"
+description:  "On June 14th, 2018, I participated in a Data Hackathon as part of the REU program at George Mason University."
+author: "Howard Baek"
+date: "2018-06-18"
+categories: [Research]
+image: "thumbnail.jpg"
+---
+
+## Introduction
+
+On June 14th, 2018, I participated in a Data Hackathon as part of the REU program at George Mason University. It was my first ever hackathon and I was excited to finally participate in one. It lasted approximately 4 hours, from 10am to 2pm. Our team, consisting of three undergraduate students, worked with the famous Wine Quality dataset, which is hosted by [University of California Irvine's Center for Machine Learning and Intelligent Systems](https://archive.ics.uci.edu/ml/index.php). The goal of the hackathon was to accurately predict the Quality variable ("Good"= 1 or "Bad" = 0)
+
+## Dataset
+
+I first import the dataset and observe it.
+
+```{r, warning=FALSE, message=FALSE}
+# Load tidyverse and caret package
+library(tidyverse)
+library(caret)
+
+# Import training / test data
+wine_train <- read_csv("wine_train.csv")
+wine_test <- read_csv("wine_test.csv")
+```
+
+```{r}
+glimpse(wine_train)
+glimpse(wine_test)
+```
+
+Training data has 799 observations and 12 variables, including the target variable, Quality, while the testing data has 800 observations and exactly the same attributes except Quality.
+
+## Data Manipulation
+
+```{r}
+# Change columns names- Take out single quotations and underscores from names 
+names(wine_train) <- gsub("'", '', names(wine_train))
+names(wine_train) <- gsub(" ", "_", names(wine_train))
+names(wine_train)
+
+names(wine_test) <- gsub("'", '', names(wine_test))
+names(wine_test) <- gsub(" ", "_", names(wine_test))
+names(wine_test)
+```
+
+```{r}
+# Change values in Quality column: "B" = 0 & "G" = 1
+wine_train <- wine_train %>% 
+  mutate(Quality = ifelse(Quality == "B", 0, 1))
+
+# Observe number of 0s and 1s
+table(wine_train$Quality)
+```
+
+<br>
+
+## Feature Selection
+
+I first wanted to select the relevant and useful features by means of feature selection in the [caret package](https://topepo.github.io/caret/index.html), a popular R package for statistical machine learning. This tutorial got me started: https://machinelearningmastery.com/feature-selection-with-the-caret-r-package/
+
+```{r}
+# Feature Selection #1
+set.seed(7) # Bring me luck
+train_cor <- cor(wine_train[, -length(names(wine_train))])
+
+# summarize the correlation matrix
+print(train_cor)
+
+# find attributes that are highly corrected (ideally >0.75)
+high_cor <- findCorrelation(train_cor, cutoff=0.5)
+
+# print indexes of highly correlated attributes
+print(high_cor)
+```
+
+-   Index 1 = `fixed_acidity`
+-   Index 2 = `citric_acid`
+-   Index 3 = `total_sulfur_dioxide`
+
+## Model Fitting
+
+Since `fixed_acidity`, `citric_acid` and `total_sulfur_dioxide` are highly correlated (redundant), I only used one of these features (`total_sulfur_dioxide`) and disposed of the two redundant ones (`fixed_acidity`, `citric_acid`). At this point, I formulated a hypothesis: a model without redundant features performs better than a model with redundant features. Let's find out if this is true.
+
+*Since the target variable is binary, I fit a logistic regression.*
+
+```{r}
+# Logistic Regression
+wine_train$Quality <- factor(wine_train$Quality, levels = c(0, 1))
+train_log <- createDataPartition(wine_train$Quality, p=0.6, list=FALSE)
+training <- wine_train[train_log, ]
+testing <- wine_train[ -train_log, ]
+
+# Hypothesis: Try logistic regression with all the predictor variables
+mod_log <- train(Quality ~ .,  data=training, method="glm", family="binomial")
+
+exp(coef(mod_log$finalModel))
+pred <- predict(mod_log, newdata=testing)
+accuracy <- table(pred, testing$Quality)
+sum(diag(accuracy))/sum(accuracy)
+
+# Hypothesis: Try logistic regression without the redundant variables
+# Try logistic regression without highly correlated variables
+mod_log_2 <- train(Quality ~ volatile_acidity + residual_sugar + chlorides + free_sulfur_dioxide + total_sulfur_dioxide + density + pH + sulphates + alcohol,  data=training, method="glm", family="binomial")
+
+pred_2 <- predict(mod_log_2, newdata = testing)
+accuracy_2 <- table(pred_2, testing$Quality)
+sum(diag(accuracy_2))/sum(accuracy_2)
+```
+
+The first hypothesis yields an accuracy rate of 71.5%! while the first hypothesis yields 70.8%! Apparently, including all the variables yields higher accuracy.
+
+## Cross Validation
+
+At this point, I looked on the tutorial page for the caret package to learn how to cross validate. I learned about `trainControl`, a function "used to specify the type of resampling". The parameter, `method`, specifies `repeatedcv`, which stands for repeated cross validation.
+
+```{r}
+# Cross validation on the second model where I took out the redundant variables
+ctrl <- trainControl(method = "repeatedcv", repeats = 10)
+
+# Train logistic regression model
+mod_log_2_ctrl <- train(Quality ~ volatile_acidity + residual_sugar + chlorides + free_sulfur_dioxide +
+                     total_sulfur_dioxide + density + pH + sulphates + alcohol, data=training, 
+                     trControl = ctrl, method="glm", family="binomial")
+pred_2_ctrl <- predict(mod_log_2, newdata = testing)
+accuracy_2_ctrl <- table(pred_2, testing$Quality)
+sum(diag(accuracy_2_ctrl))/sum(accuracy_2_ctrl)
+
+```
+
+I got the same accuracy, which means that I didn't use cross validation properly...I'll have to learn more.
+
+## Advanced Models
+
+In an effort to achieve a higher accuracy score, I looked for more accurate and powerful models, such as XgBoost, Random Forests, etc.
+
+```{r, eval = F}
+# XgBoost -----------------------------------------------------------------
+mod_xgboost <- train(Quality ~ ., data=training, 
+      trControl = ctrl, method="xgbTree", family="binomial")
+pred_xgboost <- predict(mod_xgboost, newdata = testing)
+acc_xgboost <- table(pred_xgboost, testing$Quality)
+sum(diag(acc_xgboost))/sum(acc_xgboost)
+# 70.8%
+
+# Random Forest-----------------------------------------------------------------
+mod_rf <- train(Quality ~ volatile_acidity + residual_sugar + chlorides + free_sulfur_dioxide +
+                  total_sulfur_dioxide + density + pH + sulphates + alcohol, data=training, 
+                trControl = ctrl, method="rf", family="binomial")
+pred_rf <- predict(mod_rf, newdata = testing)
+acc_rf <- table(pred_rf, testing$Quality)
+sum(diag(acc_rf)) / sum(acc_rf)
+# 80.6% is an improvement!
+
+# Logit Boost-----------------------------------------------------------------
+mod_logit <- train(Quality ~ volatile_acidity + residual_sugar + chlorides + free_sulfur_dioxide +
+                  total_sulfur_dioxide + density + pH + sulphates + alcohol, data=training, 
+                trControl = ctrl, method="LogitBoost")
+pred_logit <- predict(mod_logit, newdata = testing)
+acc_logit <- table(pred_logit, testing$Quality)
+sum(diag(acc_logit)) / sum(acc_logit)
+# 72.1%
+
+# svmRadial-----------------------------------------------------------------
+mod_svm <- train(Quality ~ volatile_acidity + residual_sugar + chlorides + free_sulfur_dioxide +
+                     total_sulfur_dioxide + density + pH + sulphates + alcohol, data=training, 
+                   trControl = ctrl, method="svmRadial")
+pred_svm <- predict(mod_svm, newdata = testing)
+acc_svm <- table(pred_svm, testing$Quality)
+sum(diag(acc_svm)) / sum(acc_svm)
+# 75.2%
+
+# LMT-----------------------------------------------------------------
+mod_svm_linear <- train(Quality ~ volatile_acidity + residual_sugar + chlorides + free_sulfur_dioxide +
+                   total_sulfur_dioxide + density + pH + sulphates + alcohol, data=training, 
+                 trControl = ctrl, method="svmLinearWeights2")
+pred_svm_linear <- predict(mod_svm_linear, newdata = testing)
+acc_svm_linear <- table(pred_svm_linear, testing$Quality)
+sum(diag(acc_svm_linear)) / sum(acc_svm_linear)
+```
+
+## Conclusion
+
+I learned about a totally new field in machine learning. Importantly, is very interesting and motivating since coming up with machine learning models feels like creating and refining a crystal ball that shows the future. In the future, I plan on reading through [this comprehensive tutorial of the caret package](https://topepo.github.io/caret/index.html), take machine learning courses on [DataCamp](www.datacamp.com), and hope to learn from the mistakes I made during this hackathon.

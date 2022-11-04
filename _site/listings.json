@@ -1,0 +1,18 @@
+[
+  {
+    "listing": "/blog.html",
+    "items": [
+      "/posts/automatic-detection-upwelling/index.html",
+      "/posts/demo-nhl-play-by-play-app/index.html",
+      "/posts/animating-epv-in-the-nba-extended/index.html",
+      "/posts/animating-epv-in-the-nba/index.html",
+      "/posts/building-nhl-play-by-play-app/index.html",
+      "/posts/difference-regular-season-playoffs-extended/index.html",
+      "/posts/difference-regular-season-playoffs/index.html",
+      "/posts/analyzing-twitter-accounts/index.html",
+      "/posts/summary-data-mining-paper/index.html",
+      "/posts/are-teams-getting-lucky-on-rushes/index.html",
+      "/posts/wine-quality-prediction/index.html"
+    ]
+  }
+]

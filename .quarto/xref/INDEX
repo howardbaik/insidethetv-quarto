@@ -1,0 +1,50 @@
+{
+  "posts/post-with-code/index.qmd": {
+    "index.html": "1488a689"
+  },
+  "posts/welcome/index.qmd": {
+    "index.html": "f4794ed2"
+  },
+  "index.qmd": {
+    "index.html": "93859953"
+  },
+  "about.qmd": {
+    "about.html": "cef74d24"
+  },
+  "posts/summary-data-mining-paper/index.qmd": {
+    "index.html": "6d02e7c8"
+  },
+  "posts/wine-quality-prediction/index.qmd": {
+    "index.html": "c5f9bb68"
+  },
+  "posts/analyzing-twitter-accounts/index.qmd": {
+    "index.html": "b4aa2a15"
+  },
+  "posts/animating-epv-in-the-nba/index.qmd": {
+    "index.html": "f33dd60c"
+  },
+  "posts/animating-epv-in-the-nba-extended/index.qmd": {
+    "index.html": "8e01345c"
+  },
+  "posts/are-teams-getting-lucky-on-rushes/index.qmd": {
+    "index.html": "9e89ed09"
+  },
+  "posts/difference-regular-season-playoffs/index.qmd": {
+    "index.html": "6615a74c"
+  },
+  "posts/difference-regular-season-playoffs-extended/index.qmd": {
+    "index.html": "2b55d0e4"
+  },
+  "posts/demo-nhl-play-by-play-app/index.qmd": {
+    "index.html": "8254d8a4"
+  },
+  "posts/building-nhl-play-by-play-app/index.qmd": {
+    "index.html": "53e8afcb"
+  },
+  "posts/automatic-detection-upwelling/index.qmd": {
+    "index.html": "f63471b2"
+  },
+  "blog.qmd": {
+    "blog.html": "8b04b64f"
+  }
+}
