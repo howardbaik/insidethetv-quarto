@@ -6,3 +6,8 @@ freeze: true
 
 # Enable banner style title blocks
 title-block-banner: true
+
+# add comments section using utterances
+comments: 
+  utterances: 
+    repo: howardbaek/blog-comments
