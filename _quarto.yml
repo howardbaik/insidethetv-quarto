@@ -3,11 +3,13 @@ project:
 
 website:
   title: "Howard Baek"
+  site-url: "https://howardbaek.com/"
   favicon: favicon.png
   navbar:
     right:
       - about.qmd
       - blog.qmd
+      - shiny.qmd
       - icon: github
         href: https://github.com/howardbaek
       - icon: twitter

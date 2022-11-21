@@ -1,0 +1,10 @@
+---
+title: "Shiny Gallery"
+listing:
+  contents:
+    - "metadata.yml"
+  type: grid
+  fields: [title, subtitle, image]
+  image-height: 100%
+page-layout: full
+---

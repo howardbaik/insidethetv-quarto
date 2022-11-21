@@ -1,0 +1,7 @@
+---
+title: "Medium Clap Predictor App"
+---
+
+Shiny App that predicts the number of claps a blog post will receive solely based on the blog post title.
+
+[Link](https://howiebaek.shinyapps.io/medium-claps-predictor/)

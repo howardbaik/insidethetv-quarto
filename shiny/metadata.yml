@@ -1,0 +1,37 @@
+# Internal slide decks
+- title: "Cure Model Simulation"
+  subtitle: "Shiny App for Simulation of a Parametric Mixture Cure Model"
+  image: ./shiny/cure-model-simulation/thumbnail.jpg
+  path: ./shiny/cure-model-simulation/index.qmd
+- title: "Maestro"
+  subtitle: "Shiny Dashboard I created called Maestro"
+  image: ./shiny/example-dashboard/thumbnail.jpg
+  path: ./shiny/example-dashboard/index.qmd
+- title: "Feedback Report"
+  subtitle: "Shiny Dashboard for displaying Patient-Reported Outcome Measures for Patients in Addiction Treatment"
+  image: ./shiny/feedback-report/thumbnail.jpg
+  path: ./shiny/feedback-report/index.qmd
+- title: "Medium Clap Predictor"
+  subtitle: "Shiny App that predicts Medium Claps using Blog Post Title"
+  image: ./shiny/medium-clap/thumbnail.png
+  path: ./shiny/medium-clap/index.qmd
+- title: "NBA Chuckers App"
+  subtitle: "Shiny App that visualizes Lineup Shot Distribution Efficiency"
+  image: ./shiny/nba-chuckers/thumbnail.jpg
+  path: ./shiny/nba-chuckers/index.qmd
+- title: "NBA Expected Possession Value"
+  subtitle: "Shiny App for Animating Expected Possession Value in the NBA"
+  image: ./shiny/nba-epv/thumbnail.jpg
+  path: ./shiny/nba-epv/index.qmd
+- title: "Solutions Manual to ggplot2: Elegant Graphics for Data Analysis"
+  subtitle: "Solutions to Exercises in ggplot2 book"
+  image: ./shiny/solutions-ggplot2/thumbnail.jpg
+  path: ./shiny/solutions-ggplot2/index.qmd
+- title: "NHL Play-by-Play"
+  subtitle: "Shiny App that visualizes NHL Play-by-Play Data" 
+  image: ./shiny/nhl-pbp/thumbnail.jpg
+  path: ./shiny/nhl-pbp/index.qmd
+- title: "Solutions Manual to Mastering Shiny"
+  subtitle: "Solutions to Exercises in Mastering Shiny"
+  image: ./shiny/solutions-ms/thumbnail.png
+  path: ./shiny/solutions-ms/index.qmd

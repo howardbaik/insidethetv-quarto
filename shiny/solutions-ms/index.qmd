@@ -1,0 +1,7 @@
+---
+title: "Mastering Shiny Solutions"
+---
+
+Solutions Manual for the exercises in [Mastering Shiny](https://mastering-shiny.org/), written by [Hadley Wickham](https://hadley.nz/).
+
+[Link](https://mastering-shiny-solutions.netlify.app/)

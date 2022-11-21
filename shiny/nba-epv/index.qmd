@@ -1,0 +1,7 @@
+---
+title: "NBA Expected Possession Value"
+---
+
+Shiny App for my blogpost called [\"Animating Expected Possession Value in the NBA\"](https://howardbaek.com/posts/animating-epv-in-the-nba/)
+
+[Link](https://howiebaek.shinyapps.io/epv-app/)

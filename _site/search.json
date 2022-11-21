@@ -511,6 +511,76 @@
     "text": "Conclusion\nHockey is an unpredictable sport. This signifies that a team that may have a horrible record before January 1st still can bounce back to become one of the league’s best teams. Just ask the 2018 Arizona Coyotes. On Dec 31st, the Coyotes were 9-26-5 and were last in the league. “But since Feb. 8, only four NHL teams had more points than Arizona over than span.” The conclusion drawn from this analysis of different offensive statistics helps explain the resurgence of the Arizona Coyotes in the second half.\nI would like to thank Sam Ventura for his valuable advice.\nCode"
   },
   {
+    "objectID": "shiny/solutions-ggplot2/index.html",
+    "href": "shiny/solutions-ggplot2/index.html",
+    "title": "Solutions to ggplot2: Elegant Graphics for Data Analysis",
+    "section": "",
+    "text": "Solutions Manual to the exercises in the 3rd edition of ggplot2: Elegant Graphics for Data Analysis written by Hadley Wickham, Danielle Navarro(https://djnavarro.net/), and Thomas Lin Pedersen(https://www.data-imaginist.com/).\nLink"
+  },
+  {
+    "objectID": "shiny/nba-epv/index.html",
+    "href": "shiny/nba-epv/index.html",
+    "title": "NBA Expected Possession Value",
+    "section": "",
+    "text": "Shiny App for my blogpost called \"Animating Expected Possession Value in the NBA\"\nLink"
+  },
+  {
+    "objectID": "shiny/cure-model-simulation/index.html",
+    "href": "shiny/cure-model-simulation/index.html",
+    "title": "Cure Model Simuation",
+    "section": "",
+    "text": "Simulation of a Parametric Mixture Cure Model.\nLink"
+  },
+  {
+    "objectID": "shiny/medium-clap/index.html",
+    "href": "shiny/medium-clap/index.html",
+    "title": "Medium Clap Predictor App",
+    "section": "",
+    "text": "Shiny App that predicts the number of claps a blog post will receive solely based on the blog post title.\nLink"
+  },
+  {
+    "objectID": "shiny/example-dashboard/index.html",
+    "href": "shiny/example-dashboard/index.html",
+    "title": "Example Dashboard: Maestro",
+    "section": "",
+    "text": "A Shiny Dashboard I created called Maestro\nLink"
+  },
+  {
+    "objectID": "shiny/nhl-pbp/index.html",
+    "href": "shiny/nhl-pbp/index.html",
+    "title": "NHL Play-by-Play",
+    "section": "",
+    "text": "Shiny App that visualizes NHL Play-by-Play Data\nLink"
+  },
+  {
+    "objectID": "shiny/solutions-ms/index.html",
+    "href": "shiny/solutions-ms/index.html",
+    "title": "Mastering Shiny Solutions",
+    "section": "",
+    "text": "Solutions Manual for the exercises in Mastering Shiny, written by Hadley Wickham.\nLink"
+  },
+  {
+    "objectID": "shiny/nba-chuckers/index.html",
+    "href": "shiny/nba-chuckers/index.html",
+    "title": "NBA Chuckers",
+    "section": "",
+    "text": "Shiny App that visualizes Lineup Shot Distribution EFficiency from the 16/17 NBA Season.\nLink"
+  },
+  {
+    "objectID": "shiny/feedback-report/index.html",
+    "href": "shiny/feedback-report/index.html",
+    "title": "Feedback Report",
+    "section": "",
+    "text": "A Web-Based Shiny Dashboard for displaying Patient-Reported Outcome Measures for Patients in Addiction Treatment.\nLink"
+  },
+  {
+    "objectID": "shiny.html",
+    "href": "shiny.html",
+    "title": "Shiny Gallery",
+    "section": "",
+    "text": "Cure Model Simulation\n\n\nShiny App for Simulation of a Parametric Mixture Cure Model\n\n\n\n\n\n\n\n\n\n\n\n\n\nMaestro\n\n\nShiny Dashboard I created called Maestro\n\n\n\n\n\n\n\n\n\n\n\n\n\nFeedback Report\n\n\nShiny Dashboard for displaying Patient-Reported Outcome Measures for Patients in Addiction Treatment\n\n\n\n\n\n\n\n\n\n\n\n\n\nMedium Clap Predictor\n\n\nShiny App that predicts Medium Claps using Blog Post Title\n\n\n\n\n\n\n\n\n\n\n\n\n\nNBA Chuckers App\n\n\nShiny App that visualizes Lineup Shot Distribution Efficiency\n\n\n\n\n\n\n\n\n\n\n\n\n\nNBA Expected Possession Value\n\n\nShiny App for Animating Expected Possession Value in the NBA\n\n\n\n\n\n\n\n\n\n\n\n\n\nSolutions Manual to ggplot2: Elegant Graphics for Data Analysis\n\n\nSolutions to Exercises in ggplot2 book\n\n\n\n\n\n\n\n\n\n\n\n\n\nNHL Play-by-Play\n\n\nShiny App that visualizes NHL Play-by-Play Data\n\n\n\n\n\n\n\n\n\n\n\n\n\nSolutions Manual to Mastering Shiny\n\n\nSolutions to Exercises in Mastering Shiny\n\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Howard Baek",
@@ -529,7 +599,7 @@
     "href": "index.html#experience",
     "title": "Howard Baek",
     "section": "Experience",
-    "text": "Experience\nMerck | Contractor | March, 2022 - present\nMerck | Biostatistics Intern | June, 2022 - Aug, 2022\nNOAA | Machine Learning Intern | June, 2021 - Sept, 2022"
+    "text": "Experience\nMerck | Contractor | March, 2022 - present\nMerck | Biostatistics Intern | June, 2022 - Aug, 2022"
   },
   {
     "objectID": "about.html",

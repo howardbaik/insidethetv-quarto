@@ -1,0 +1,7 @@
+---
+title: "NBA Chuckers"
+---
+
+Shiny App that visualizes Lineup Shot Distribution EFficiency from the 16/17 NBA Season.
+
+[Link](https://howiebaek.shinyapps.io/nba-chuckers/)

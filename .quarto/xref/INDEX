@@ -46,5 +46,35 @@
   },
   "blog.qmd": {
     "blog.html": "8b04b64f"
+  },
+  "shiny.qmd": {
+    "shiny.html": "c2542567"
+  },
+  "shiny/cure-model-simulation/index.qmd": {
+    "index.html": "231aa5a7"
+  },
+  "shiny/example-dashboard/index.qmd": {
+    "index.html": "c0cee9a6"
+  },
+  "shiny/solutions-ggplot2/index.qmd": {
+    "index.html": "0ff89d59"
+  },
+  "shiny/nba-epv/index.qmd": {
+    "index.html": "93118f4e"
+  },
+  "shiny/medium-clap/index.qmd": {
+    "index.html": "69f49339"
+  },
+  "shiny/nhl-pbp/index.qmd": {
+    "index.html": "45137aa2"
+  },
+  "shiny/solutions-ms/index.qmd": {
+    "index.html": "185f28ce"
+  },
+  "shiny/nba-chuckers/index.qmd": {
+    "index.html": "b6c32ba2"
+  },
+  "shiny/feedback-report/index.qmd": {
+    "index.html": "e16582d2"
   }
 }
