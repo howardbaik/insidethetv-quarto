@@ -1,0 +1,56 @@
+---
+title: "Projects"
+page-layout: full
+listing:
+  type: grid
+  fields: [image, categories, title, description]
+  contents:
+    - title: "NBA Chuckers"
+      image: /projects/nba-chuckers.jpg
+      path: https://howiebaek.shinyapps.io/nba-chuckers/
+      description: "Shiny App that visualizes Lineup Shot Distribution EFficiency from the 16/17 NBA Season"
+      categories: [Shiny]
+    - title: "NBA Expected Possession Value"
+      image: /projects/nba-epv.jpg
+      path: https://howiebaek.shinyapps.io/epv-app/
+      description: |
+       Shiny App that accompanies my blogpost called [\"Animating Expected Possession Value in the NBA\"](https://howardbaek.com/posts/animating-epv-in-the-nba/)
+      categories: [Shiny]
+    - title: "Ggplot2: Elegant Graphics for Data Analysis Solutions"
+      image: /projects/solutions-ggplot2.jpg
+      path: https://ggplot2-book-solutions-3ed.netlify.app/
+      description: |
+        Solutions Manual to the exercises in the [3rd edition of ggplot2: Elegant Graphics for Data Analysis](https://ggplot2-book.org/index.html) written by [Hadley      Wickham](https://hadley.nz/), Danielle Navarro(https://djnavarro.net/), and Thomas Lin Pedersen(https://www.data-imaginist.com/)
+      categories: [Bookdown]
+    - title: "Mastering Shiny Solutions"
+      image: /projects/solutions-ms.png
+      path: https://mastering-shiny-solutions.netlify.app/
+      description: |
+        Solutions Manual for the exercises in [Mastering Shiny](https://mastering-shiny.org/), written by [Hadley Wickham](https://hadley.nz/)
+      categories: [Bookdown]
+    - title: "Example Shiny Dashboard"
+      image: /projects/example-dashboard.jpg
+      path: https://billypurser.shinyapps.io/harmonicrx/
+      description: "An Example Shiny Dashboard I created called Maestro"
+      categories: [Shiny]
+    - title: "Feedback Report"
+      image: /projects/feedback-report.jpg
+      path: https://github.com/howardbaek/addiction-dashboard-simple
+      description: "A Web-Based Shiny Dashboard for displaying Patient-Reported Outcome Measures for Patients in Addiction Treatment"
+      categories: [Shiny]
+    - title: "Cure Model Simuation"
+      image: /projects/cure-model.jpg
+      path: https://howiebaek-2.shinyapps.io/mixture-cure-model-sim/
+      description: "Simulation of a Parametric Mixture Cure Model"
+      categories: [Shiny]
+    - title: "Medium Clap Predictor App"
+      image: /projects/medium-clap.png
+      path: https://howiebaek.shinyapps.io/medium-claps-predictor/
+      description: "Shiny App that predicts the number of claps a blog post will receive solely based on the blog post title"
+      categories: [Shiny]
+    - title: "NHL Play-by-Play"
+      image: /projects/nhl-pbp.png
+      path: https://howiebaek.shinyapps.io/nhl-pbp/
+      description: "Shiny App that visualizes NHL Play-by-Play Data"
+      categories: [Shiny]
+---

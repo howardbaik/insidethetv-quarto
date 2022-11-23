@@ -1,7 +1,0 @@
----
-title: "Example Dashboard: Maestro"
----
-
-A Shiny Dashboard I created called Maestro
-
-[Link](https://billypurser.shinyapps.io/harmonicrx/)

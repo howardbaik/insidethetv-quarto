@@ -1,7 +1,0 @@
----
-title: "Cure Model Simuation"
----
-
-Simulation of a Parametric Mixture Cure Model.
-
-[Link](https://howiebaek-2.shinyapps.io/mixture-cure-model-sim/)

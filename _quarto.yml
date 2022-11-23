@@ -9,11 +9,15 @@ website:
     right:
       - about.qmd
       - blog.qmd
-      - shiny.qmd
+      - projects.qmd
       - icon: github
         href: https://github.com/howardbaek
       - icon: twitter
         href: https://twitter.com/howard_baek
+  page-footer:
+    left: |
+      Powered by [Quarto](https://quarto.org)
+    border: false
 format:
   html:
     theme: litera

@@ -1,17 +1,7 @@
 [
   {
-    "listing": "/shiny.html",
-    "items": [
-      "shiny/cure-model-simulation/index.html",
-      "shiny/example-dashboard/index.html",
-      "shiny/feedback-report/index.html",
-      "shiny/medium-clap/index.html",
-      "shiny/nba-chuckers/index.html",
-      "shiny/nba-epv/index.html",
-      "shiny/solutions-ggplot2/index.html",
-      "shiny/nhl-pbp/index.html",
-      "shiny/solutions-ms/index.html"
-    ]
+    "listing": "/projects.html",
+    "items": []
   },
   {
     "listing": "/blog.html",

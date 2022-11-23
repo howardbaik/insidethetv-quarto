@@ -1,8 +1,5 @@
 {
   "listingMap": {
-    "shiny.qmd": [
-      "metadata.yml"
-    ],
     "blog.qmd": [
       "posts"
     ]

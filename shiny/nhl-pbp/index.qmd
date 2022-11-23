@@ -1,7 +1,0 @@
----
-title: "NHL Play-by-Play"
----
-
-Shiny App that visualizes NHL Play-by-Play Data
-
-[Link](https://howiebaek.shinyapps.io/nhl-pbp/)
