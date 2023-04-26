@@ -16,18 +16,18 @@ about:
       href: https://github.com/howardbaek
 ---
 
-Howard Baek is a Master's student in Biostatistics at the University of Washington. Also, he works at Merck, where he contributes to internal R packages and designs internal Shiny apps for analysis and reporting in a regulatory environment.
+Howard Baek is a Software Development Engineer at the [Fred Hutch Data Science Lab](https://hutchdatascience.org/).
 
 ## Education
 
-University of Washington | Seattle, WA
-Master of Science in Biostatistics | March, 2023
+University of Washington \| Seattle, WA Master of Science in Biostatistics \| March, 2023
 
-University of Washington | Seattle, WA
-Bachelor of Science in Statistics (Minor: Mathematics)  | June, 2021
+University of Washington \| Seattle, WA Bachelor of Science in Statistics (Minor: Mathematics) \| June, 2021
 
 ## Experience
 
-Merck | Contractor | March, 2022 - present
+Fred Hutch Data Science Lab \| Software Development Engineer \| March, 2023 - Present
 
-Merck | Biostatistics Intern | June, 2022 - Aug, 2022
+Merck \| Contractor \| March, 2022 - March, 2023
+
+Merck \| Biostatistics Intern \| June, 2022 - Aug, 2022

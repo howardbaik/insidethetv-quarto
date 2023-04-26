@@ -522,7 +522,7 @@
     "href": "index.html",
     "title": "Howard Baek",
     "section": "",
-    "text": "Howard Baek is a Master’s student in Biostatistics at the University of Washington. Also, he works at Merck, where he contributes to internal R packages and designs internal Shiny apps for analysis and reporting in a regulatory environment."
+    "text": "Howard Baek is a Software Development Engineer at the Fred Hutch Data Science Lab."
   },
   {
     "objectID": "index.html#education",
@@ -536,14 +536,14 @@
     "href": "index.html#experience",
     "title": "Howard Baek",
     "section": "Experience",
-    "text": "Experience\nMerck | Contractor | March, 2022 - present\nMerck | Biostatistics Intern | June, 2022 - Aug, 2022"
+    "text": "Experience\nFred Hutch Data Science Lab | Software Development Engineer | March, 2023 - Present\nMerck | Contractor | March, 2022 - March, 2023\nMerck | Biostatistics Intern | June, 2022 - Aug, 2022"
   },
   {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About Me",
     "section": "",
-    "text": "I am a Master’s student in Biostatistics (Data Science Pathway) at the University of Washington. Also, I am a Contractor at Merck, where I design internal R packages and a Shiny app for analysis and reporting process in a regulatory environment. Recently, I worked as a Biostatistics Intern at Merck, where I created an R package for querying ClinicalTrials.gov and building an analysis dataset (focus on oncology clinical trials) and programmed an accompanying Shiny app.\nMy past experiences include a Machine Learning Internship at Northwest Fisheries Science Center (NWFSC), where I created an algorithm to detect an oceanographic process, NIH Research Assistantship at the Behavioral Research In Technology and Engineering (BRiTE) Center, where I developed a Shiny Dashboard that allows patients and clinicians in addiction treatment to monitor patients’ progress and goals over time, and an Educational Data Mining Research Internship at George Mason University, where I analyzed real world datasets of an online course at Stanford."
+    "text": "I am a Software Development Engineer at the Fred Hutch Data Science Lab.\nI have a Master’s in Biostatistics from the University of Washington. My past experiences include an internship at Merck, a Machine Learning Internship at Northwest Fisheries Science Center (NWFSC), where I created an algorithm to detect an oceanographic process, NIH Research Assistantship at the Behavioral Research In Technology and Engineering (BRiTE) Center, where I developed a Shiny Dashboard that allows patients and clinicians in addiction treatment to monitor patients’ progress and goals over time, and an Educational Data Mining Research Internship at George Mason University, where I analyzed real world datasets of an online course at Stanford."
   },
   {
     "objectID": "blog.html",
