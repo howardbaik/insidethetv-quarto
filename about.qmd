@@ -2,7 +2,7 @@
 title: "About Me"
 ---
 
-![](about-me.JPG){height="500px"}
+![](about-me.jpg){height="500px"}
 
 I am a Software Development Engineer at the [Fred Hutch Data Science Lab](https://hutchdatascience.org/).
 

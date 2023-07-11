@@ -1,9 +1,9 @@
 ---
 title: "Howard Baek"
-image: profile.jpg
+image: profile.jpeg
 about:
   template: trestles
-  image-shape: round
+  image-shape: rectangle
   links:
     - icon: twitter
       text: Twitter
