@@ -6,6 +6,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/my-r-journal/index.html",
       "/posts/automatic-detection-upwelling/index.html",
       "/posts/demo-nhl-play-by-play-app/index.html",
       "/posts/animating-epv-in-the-nba-extended/index.html",

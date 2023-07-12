@@ -1,0 +1,57 @@
+---
+title: "My R Journal"
+description:  "Things I learn along my R programming journey."
+author: "Howard Baek"
+date: "2023-07-11"
+categories: [Software Engineering]
+image: "thumbnail.jpg"
+---
+
+Tips and tricks I learn to program in R.
+
+## R package
+
+### Submitting to CRAN
+
+#### First release:
+
+- `usethis::use_news_md()` creates a NEWS.md file with "News" items
+- `usethis::use_cran_comments()` initiates a file to hold submission comments for your package
+- Update instructions on README to install package from Github to from CRAN, in anticipation of your package's acceptance.
+- Proofread `Title:` and `Desription:` fields of DESCRIPTION as they are real hotspots for nitpicking during CRAN's human review. Read advice given in [Section 9.2](https://r-pkgs.org/description.html#sec-description-title-and-description) of the R Packages book.
+- Check that all exported functions have `@returns` and `@examples`
+- Check licenses
+- Review [https://github.com/DavisVaughan/extrachecks](https://github.com/DavisVaughan/extrachecks) (extra ad-hoc checks that CRAN does that are not checked for by `devtools::check()`)
+
+To keep tabs on what other package maintainers are talking about, [https://stat.ethz.ch/mailman/listinfo/r-package-devel](https://stat.ethz.ch/mailman/listinfo/r-package-devel)
+
+
+#### Updating a package already on CRAN:
+
+- Check current CRAN check results
+- If you have depcreated functions, check [Gradual deprecation](https://lifecycle.r-lib.org/articles/communicate.html#gradual-deprecation)
+- Update [NEWS](https://style.tidyverse.org/news.html#news-release) with changes to the package.
+- Run `urlchecker::url_check()` and `devtools::build_readme()`
+
+
+#### Always Run No Matter What:
+
+- `devtools::check(remote = TRUE, manual = TRUE)`
+- `devtools::check_win_devel()`
+- `rhub::check_for_cran()` (There are some bug-related messages, like `Skipping checking HTML validation: no command 'tidy' found`, `Found the following files/directories: NULL or lastMiKTeXException`)
+
+
+#### Reverse Dependency Check:
+
+Running for the first time: `usethis::use_revdep()`
+Then, run `revdepcheck::revdep_check(num_workers = 4)`
+
+
+#### Ready to Submit:
+
+- Bump the version number in DESCRIPTION
+- `devtools::submit_cran()`. After a successful upload, you should receive an email from CRAN within a few minutes. This email notifies you, as maintainer, of the submission and provides a confirmation link.
+- At the confirmation link, you are required to re-confirm that you’ve followed CRAN’s policies and that you want to submit the package. If you fail to complete this step, your package is not actually submitted to CRAN!
+
+
+

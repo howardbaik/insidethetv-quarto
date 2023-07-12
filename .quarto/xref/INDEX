@@ -79,5 +79,8 @@
   },
   "projects.qmd": {
     "projects.html": "de235381"
+  },
+  "posts/my-r-journal/index.qmd": {
+    "index.html": "1b5d0ae0"
   }
 }
