@@ -69,3 +69,4 @@ Further Reading on dealing with OAuth 2.0 in R:
 -   <https://blog.r-hub.io/2021/01/25/oauth-2.0/>
 -   <https://googledrive.tidyverse.org/articles/bring-your-own-app.html>
 -   <https://www.youtube.com/watch?v=hHRFjbGTEOk>
+-   <https://www.youtube.com/watch?v=3pZ3Nh8tgTE>
