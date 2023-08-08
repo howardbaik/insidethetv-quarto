@@ -48,14 +48,13 @@ Running for the first time: `usethis::use_revdep()` Then, run `revdepcheck::revd
 -   `devtools::submit_cran()`. After a successful upload, you should receive an email from CRAN within a few minutes. This email notifies you, as maintainer, of the submission and provides a confirmation link.
 -   At the confirmation link, you are required to re-confirm that you've followed CRAN's policies and that you want to submit the package. If you fail to complete this step, your package is not actually submitted to CRAN!
 
-
 ## APIs
 
 ### Google APIs and OAuth 2.0
 
-Source: https://developers.google.com/identity/protocols/oauth2
+Source: <https://developers.google.com/identity/protocols/oauth2>
 
-Google APIs use the [OAuth 2.0 protocol](https://datatracker.ietf.org/doc/html/rfc6749) for authentication and authorization. To begin, obtain OAuth 2.0 client credentials from the [Google Cloud](https://console.cloud.google.com/). Then your client application requests an access token from the Google Authorization Server, extracts a token from the response, and sends the token to the Google API that you want to access. 
+Google APIs use the [OAuth 2.0 protocol](https://datatracker.ietf.org/doc/html/rfc6749) for authentication and authorization. To begin, obtain OAuth 2.0 client credentials from the [Google Cloud](https://console.cloud.google.com/). Then your client application requests an access token from the Google Authorization Server, extracts a token from the response, and sends the token to the Google API that you want to access.
 
 For an interactive demonstration of using OAuth 2.0 with Google (including the option to use your own client credentials), experiment with the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 
@@ -63,9 +62,10 @@ Before your application can access private data using a Google API, it must obta
 
 Some requests require an authentication step where the user logs in with their Google account. After logging in, the user is asked whether they are willing to grant one or more permissions that your application is requesting. This process is called user consent.
 
-See [this diagram](https://developers.google.com/identity/protocols/oauth2#webserver) to get an overview of the entirep rocess of calling a Google API.
+See [this diagram](https://developers.google.com/identity/protocols/oauth2#webserver) to get an overview of the entire process of calling a Google API.
 
 Further Reading on dealing with OAuth 2.0 in R:
 
-- <https://blog.r-hub.io/2021/01/25/oauth-2.0/>
-- <https://googledrive.tidyverse.org/articles/bring-your-own-app.html>
+-   <https://blog.r-hub.io/2021/01/25/oauth-2.0/>
+-   <https://googledrive.tidyverse.org/articles/bring-your-own-app.html>
+-   <https://www.youtube.com/watch?v=hHRFjbGTEOk>
