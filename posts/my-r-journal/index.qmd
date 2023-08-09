@@ -54,7 +54,7 @@ Running for the first time: `usethis::use_revdep()` Then, run `revdepcheck::revd
 
 Source: <https://developers.google.com/identity/protocols/oauth2>
 
-Google APIs use the [OAuth 2.0 protocol](https://datatracker.ietf.org/doc/html/rfc6749) for authentication and authorization. To begin, obtain OAuth 2.0 client credentials from the [Google Cloud](https://console.cloud.google.com/). Then your client application requests an access token from the Google Authorization Server, extracts a token from the response, and sends the token to the Google API that you want to access.
+Google APIs use the [OAuth 2.0 protocol](https://datatracker.ietf.org/doc/html/rfc6749) for authentication and authorization. To begin, obtain OAuth 2.0 client credentials from the [Google Cloud](https://console.cloud.google.com/). See [this page](https://gargle.r-lib.org/articles/get-api-credentials.html) on getting your own API credentials. Then your client application requests an access token from the Google Authorization Server, extracts a token from the response, and sends the token to the Google API that you want to access.
 
 For an interactive demonstration of using OAuth 2.0 with Google (including the option to use your own client credentials), experiment with the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
 
