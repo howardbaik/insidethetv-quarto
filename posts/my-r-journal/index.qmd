@@ -11,6 +11,15 @@ Tips and tricks I learn to program in R.
 
 ## R package
 
+### Demystifying Dependencies
+
+Choose whether package dependency is an "Imports" or a "Suggests" package: <https://r-pkgs.org/dependencies-mindset-background.html#sec-dependencies-imports-vs-suggests>
+
+"Imports": Read Section 11.1 ~ 11.4 from the R Packages book: <https://r-pkgs.org/dependencies-in-practice.html#confusion-about-imports>. 
+
+"Suggests": Read Section 11.5 from the R Packages book:
+<https://r-pkgs.org/dependencies-in-practice.html#sec-dependencies-in-suggests>
+
 ### Submitting to CRAN
 
 #### First release:
