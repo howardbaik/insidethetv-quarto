@@ -84,14 +84,13 @@ Further Reading on dealing with OAuth 2.0 in R:
 -   <https://www.youtube.com/watch?v=hHRFjbGTEOk>
 -   <https://www.youtube.com/watch?v=3pZ3Nh8tgTE>
 
-
-## {knitr} 
+## {knitr}
 
 ### Chunk options
 
 When you *knit* a R Markdown file with the following code chunks,
 
-Setup code chunk (not shown because `include` set to FALSE): 
+Setup code chunk (not shown because `include` set to FALSE):
 
 ```{r, eval = FALSE}
 knitr::opts_chunk$set(echo = TRUE, comment = ">")
@@ -101,12 +100,11 @@ knitr::opts_chunk$set(echo = TRUE, comment = ">")
 knitr::opts_chunk$set(echo = TRUE, comment = ">")
 ```
 
-
 ```{r}
 knitr::opts_chunk$get()[c("echo", "comment")]
 ```
 
-`knitr::opts_chunk$get()` shows you the default (global) options. 
+`knitr::opts_chunk$get()` shows you the default (global) options.
 
 ```{r, tidy = TRUE, comment = "###"}
 knitr::opts_current$get()[c("echo", "comment")]
@@ -116,4 +114,4 @@ knitr::opts_current$get()[c("echo", "comment")]
 
 The doc gives more details:
 
-> Normally we set up the global options once in the first code chunk in a document using `opts_chunk$set()`, so that all latter chunks will use these options. Note the global options set in one chunk will not affect the options in this chunk itself, and that is why we often need to set global options in a separate chunk. 
+> Normally we set up the global options once in the first code chunk in a document using `opts_chunk$set()`, so that all latter chunks will use these options. Note the global options set in one chunk will not affect the options in this chunk itself, and that is why we often need to set global options in a separate chunk.
