@@ -2,18 +2,17 @@ project:
   type: website
 
 website:
-  title: "Howard Baek"
+  title: "Howard Baik"
   site-url: "https://howardbaek.com/"
   favicon: favicon.png
   navbar:
     right:
-      - about.qmd
       - blog.qmd
       - projects.qmd
       - icon: github
-        href: https://github.com/howardbaek
+        href: https://github.com/howardbaik
       - icon: twitter
-        href: https://twitter.com/howard_baek
+        href: https://twitter.com/howard_baik
   page-footer:
     left: |
       Powered by [Quarto](https://quarto.org)

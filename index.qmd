@@ -1,5 +1,5 @@
 ---
-title: "Howard Baek"
+title: "Howard Baik"
 image: profile.jpeg
 about:
   template: trestles
@@ -7,18 +7,20 @@ about:
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com/howard_baek
+      href: https://twitter.com/howard_baik
     - icon: linkedin
       text: LinkedIn
-      href: https://www.linkedin.com/in/howard-baek/
+      href: https://www.linkedin.com/in/howard-baik/
     - icon: github
       text: Github
-      href: https://github.com/howardbaek
+      href: https://github.com/howardbaik
 ---
 
-Howard Baek is a Software Development Engineer at the [Fred Hutch Data Science Lab](https://hutchdatascience.org/).
+Howard Baik (he/him) is a Data Scientist I at the Yale School of Public Health.
 
 ## Education
+
+Oregon State University \| Bachelor of Science in Computer Science \| Sept, 2026
 
 University of Washington \| Seattle, WA Master of Science in Biostatistics \| March, 2023
 
@@ -26,7 +28,11 @@ University of Washington \| Seattle, WA Bachelor of Science in Statistics (Minor
 
 ## Experience
 
-Fred Hutch Data Science Lab \| Software Development Engineer \| March, 2023 - Present
+Yale School of Public Health \| Data Scientist \| September, 2024 - Present
+
+Fred Hutch Data Science Lab \| Software Development Engineer \| March, 2023 - August, 2024
+
+Fred Hutch Data Science Lab \| Software Development Engineer \| March, 2023 - August, 2024
 
 Merck \| Contractor \| March, 2022 - March, 2023
 
