@@ -3,7 +3,7 @@ project:
 
 website:
   title: "Howard Baik"
-  site-url: "https://howardbaek.com/"
+  site-url: "https://howardbaik.com/"
   favicon: favicon.png
   navbar:
     right:
