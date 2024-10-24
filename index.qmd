@@ -16,7 +16,7 @@ about:
       href: https://github.com/howardbaik
 ---
 
-Howard Baik (he/him) is a Data Scientist I at the Yale School of Public Health.
+Howard Baik (he/him) is a Data Scientist at the Yale School of Public Health.
 
 ## Education
 
