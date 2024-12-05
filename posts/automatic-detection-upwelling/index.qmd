@@ -1,7 +1,7 @@
 ---
 title: "Automatic Detection Method"
 description: "We introduce a highly effective algorithm for detecting upwelling, the automatic detection method using NOAA satellite image data."
-author: [Howard Baek, Elizabeth Eli Holmes]
+author: [Howard Baik, Elizabeth Eli Holmes]
 categories: [Data Analysis]
 date: "2021-10-26"
 bibliography: "upwelling.bib"

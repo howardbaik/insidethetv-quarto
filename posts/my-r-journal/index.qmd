@@ -1,7 +1,7 @@
 ---
 title: "My R Journal"
 description:  "Things I learn along my R programming journey."
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2023-07-11"
 categories: [Software Engineering]
 image: "thumbnail.jpg"

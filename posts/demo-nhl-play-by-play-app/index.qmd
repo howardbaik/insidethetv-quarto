@@ -1,6 +1,6 @@
 ---
 title: "Demo of NHL Play-by-Play App"
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2019-08-20"
 description: "I will be showing *insights from looking at a regular season game between the Montreal Canadiens and the Toronto Maple Leafs* on October 3rd, 2018"
 categories: [Data Visualization]

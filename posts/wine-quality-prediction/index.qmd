@@ -1,7 +1,7 @@
 ---
 title: "Wine Quality Prediction"
 description:  "On June 14th, 2018, I participated in a Data Hackathon as part of the REU program at George Mason University."
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2018-06-18"
 categories: [Research]
 image: "thumbnail.jpg"

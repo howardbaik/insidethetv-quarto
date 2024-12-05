@@ -1,7 +1,7 @@
 ---
 title: "Are Teams getting Lucky on Rushes?"
 description: 'When you watch an offensive rush in hockey, do you ever wonder about the numbers behind it?'
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2018-06-28"
 categories: [Data Analysis]
 image: "thumbnail.jpg"

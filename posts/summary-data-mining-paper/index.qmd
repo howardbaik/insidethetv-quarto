@@ -1,7 +1,7 @@
 ---
 title: "Summary of an Educational Data Mining Paper"
 description:  "Discovery and Temporal Analysis of Latent Study Patterns in MOOC Interaction Sequences"
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2018-06-28"
 categories: [Research]
 image: "thumbnail.jpg"

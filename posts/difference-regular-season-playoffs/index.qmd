@@ -1,6 +1,6 @@
 ---
 title: "Quantifying Differences between the Regular Season and Playoffs using Survival Analysis"
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2019-01-07"
 description: "From a casual fan perspective, the intensity traditionally ramps up in the playoffs because teams are closer to the grand prize, the Stanley Cup."
 categories: [Data Analysis]

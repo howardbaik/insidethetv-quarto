@@ -1,6 +1,6 @@
 ---
 title: "Quantifying Differences between the Regular Season and Playoffs Extended"
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2019-01-28"
 description: "A brief analysis to answer a question by Tom Tango on my article, Quantifying Differences between the Regular Season and the Playoffs"
 categories: [Data Analysis]

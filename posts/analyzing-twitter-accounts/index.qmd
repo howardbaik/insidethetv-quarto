@@ -1,7 +1,7 @@
 ---
 title: "Analyzing Twitter Accounts"
 description:  "I grouped Twitter accounts by popularity measure, a quick and easy way to quantify the popularity of a Twitter account"
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2019-01-04"
 categories: [Data Analysis]
 image: "thumbnail.jpg"

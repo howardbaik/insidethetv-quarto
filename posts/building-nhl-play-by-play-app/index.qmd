@@ -1,6 +1,6 @@
 ---
 title: "Building the NHL PBP App in Shiny"
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2019-02-04"
 description: "I will walk through a month-long process building the National Hockey League Play-by-Play App from scratch, giving a behind-the-scenes look."
 categories: [Data Visualization]

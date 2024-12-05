@@ -1,7 +1,7 @@
 ---
 title: "Animating Expected Possession Value in the NBA Extended"
 description: "I extend a MIT SSAC Research Paper by Cervone, DAmour, Bornn, and Goldsberry on Expected Possession Value or EPV."
-author: "Howard Baek"
+author: "Howard Baik"
 date: "2019-06-15"
 categories: [Data Visualization]
 image: "thumbnail.png"
