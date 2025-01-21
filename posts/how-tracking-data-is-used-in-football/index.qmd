@@ -1,0 +1,114 @@
+---
+title: "How Tracking Data is Used in Football and What are the Future Challenges"
+description:  "Notes I took watching Youtube video embedded below."
+author: "Howard Baik"
+date: "2025-01-18"
+categories: [Tracking Data]
+image: "thumbnail.jpg"
+---
+
+<iframe width="860" height="415" src="https://www.youtube.com/embed/kHTq9cwdkGA?si=I3MZrDZcVHBOaGVl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<br>
+
+### Introductions
+
+#### Suds Gopaladesikan (Benfica):
+
+-   Role of Tracking Data: Tracking data is used to identify context. We know passes happen from event data, but we want to understand whether the pass stretches an opponent in a certain way.
+
+-   Dribble Evaluation: Tracking data helps determine how effective a dribble is: Was the dribble actually successful? Did every touch of the dribble stay within the player's action radius?
+
+Two main things: 1. Pitch control 2. Understanding opponent behavior relative to the actions taken.
+
+Proportion of work involving tracking data: \~35%, primarily used for the first team.
+
+#### William Spearman (Liverpool):
+
+Works almost exclusively with tracking data.
+
+Key areas include:
+
+-   Space control.
+
+-   Evaluating dangerous moments.
+
+-   Contextualizing game states using tracking data.
+
+Proportion of work involving tracking data: \~90-95% of his work is based on questions that you can only answer with tracking data.
+
+#### Javier Fernandez (Barcelona):
+
+Tracking data provides a lot of information regarding context. Very important to know what you are doing on-ball and off-ball. Tracking data is very important to quantifying player development and analyzing A-team performance.
+
+Tracking and event data are inseparable. Working with tracking data inherently involves working with event data.
+
+Proportion of work involving tracking data: 50% of tracking data, 50% event data.
+
+### Presentation by Laurie D Shaw (Harvard):
+
+Data Definitions:
+
+-   **Event Data**: Log of each on-ball event (passes/tackles/shots/interceptions) as well as disciplinary events. Collected for over 20 years. Information on the location of player making a pass, receiving a pass, and the time of the game in which it occurred.
+
+-   **Tracking Data:** Continuous measure of off-ball event. Observations of player & ball positions sampled 25 times / seconds. A lot of work is done by Javier and William to make tools that extract information from tracking data.
+
+-   **Pitch Control:** How much control does either team exhibit over any given specific position on the field. If the team in possession plays the ball in the red region, they are very likely to retain possession of the ball. If the team in possession plays the ball in the blue region, they are very likely to lose possession of the ball. **Get an idea of how much territory a player is capturing.**
+
+**The event data**: We know that the ball moved from point A to point B. Can't see the run that the players were making, how the opposing team was attempting to retrieve possession.
+
+**The tracking data:** By combining the event data and the tracking data together, we can get a rich perspective of what is going on.
+
+### Challenges of working with tracking data: 
+
+#### Difficult to get data for other leagues:
+
+-   Javier Fernandez: With tracking data, try to enhance on-ball events. With event data, lots of very interesting things being done right now. The future of better understanding is having more open tracking data.
+
+-   William Spearman: Tracking data adds more context. Without body pose estimation, you don't know which foot somebody is on. There is still information that is missing. One of the difficulties of working with tracking data is viewing it as an augmentation to the event data.
+
+    -   A lot of times, ball position can help a lot. Where does ball tracking stand? If you have GPS data, you are not going to have the ball.
+
+    -   Building in the uncertainty so that your model can still tell you useful things even if the data is imperfect.
+
+-   Javier Fernandez: Try to integrate event data with video. Video is still the closest thing to reality. For example, goal kicks are terrible. People tagging a goal kick don't have the right timing,location
+
+#### Technical challenges with tracking data: 
+
+-   William Spearman: A lot of preprocessing is required to work with the tracking data in an useful way. If you just try to calculate the velocity by using the tracking data, you will get low-quality data on velocity. Widely dependent on data sources. For physical modeling, you need to smooth the data (Gaussian smoothing, etc)
+
+-   Suds Gopaladesikan: One of the challenges with tracking data is being non-invasive with players. There is still a discrepancy between accelerometer data and optical tracking. Tracking data is not at the level to understand fatigue and energy expenditure.
+
+    Another challenge is getting this in real-time. How to have tracking data stored in a proper way. Indexed event data matched with indexed video data would be great. Clubs are not necessarily technology departments.
+
+    Effectiveness of forward is to cause some sort of disruption. We can calculate disruption just by looking at lines. We can calculate lines of opponents and try to understand which players are the defense line, midfield line, and forward line.
+
+    How accurate do we need to be when we communicate to players/coaches? Suds communicate on the orders of steps to a player/coach. We communicate to a player/coach "ideally we would stretch the 2 centerbacks 12 steps apart". That's a bit more easily visualized in a player or coach's mind. There might be some errors in the model, but hopefully, the errors can be corrected with the coach's domain knowledge.
+
+-   Javier Fernandez: You want numbers in a continuous range. The reason that we see so many different expected goals models is that you are adding lots of features to that model. EPV models don't look calibrated.
+
+-   Laurie Shaw: How important is interpretability when it comes to explaining the model?
+
+-   Javier Fernandez: Interpretability is critical. What is the model taking into consideration? We can be very tempted to plug in variables that we can calculate with tracking data or e event data. The best way to make interpretable model is make the simplest model, the linear regression model. Then, fine-tune the model. Th simpler the better.
+
+-   William Spearman: Knowing the ins and outs of the model you are choosing is important. When you are first learning Python, you have 20 different models that you can choose. When you have a Decision Tree, they don't extrapolate as well to unseen areas. Something like logistic regression extrapolates well, but doesn't deal well with non-linearity. Deep learning is extremely powerful, but if you haven't built 3-4 simple models to answer the same questions, you probably shouldn't be using a deep learning model.
+
+    -   Easy to start simple and build on top. An example is the "Beyond the Expected Goals Model" paper. Before you add 30 parameters, start with just 1 parameter and see the ways adding parameters improves things.
+
+-   Laurie D Shaw: How do you measure improvement?
+
+-   William Spearman: The Data Scientist answer is that log-loss goes down. But we don't really care about log-loss. We care about football tactical interpretability. I don't want to add any more information to the model unless the tactical interpretability makes sense.
+
+-   Javier Fernandez: Only 1% of the modeling is modeling space and time to the fullest extent. To be on the same playing field as the football experts, sometimes, the simplest model is more important than the most complex model. To get to the most important topics in a conversation, a simple model is the best.
+
+-   Suds Gopaladesikan: The entire club is learning football all over again. We are all going through a re-education of the game. At the end of the day, the coaches need to understand these models because it will be the coaches coaching the players on the field.
+
+-    William Spearman: The context of the model is super-important. One of the models I look back on was a physics-based passing model, where you are simulating the pass projectory. Early in that process, by not including the information about which team the player is on, the model performed worst. If you let the team membership of a player be a parameter in the model, you will find the player have better ball control.
+
+-   Javier Fernandez: Sometimes, the model doesn't realize that a professional player will never pass the ball to the location of the opponent. So, sometimes, it helps to provide the model with a prior.
+
+-   Laurie Shaw: Team analysts have the advantage of having the coaches, the domain experts, right next to them. To what extent do the analysts incorporate the coaches' domain knowledge into the model?
+
+-   Javier Fernandez: He always incorporates the context into his model all the time.
+
+-   Suds: Tracking data helps with refactoring/restructuring player ratings.
