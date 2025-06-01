@@ -7,6 +7,7 @@ categories: [Software Engineering]
 image: "thumbnail.png"
 ---
 
+# Notes
 
 https://www.r-bloggers.com/2025/03/the-ellmer-package-for-using-llms-with-r-is-a-game-changer-for-scientists/
 
@@ -39,8 +40,17 @@ The `_async` variants take the same arguments for construction but return a prom
 
 
 
+# FYI
 
-Setup for `chat_google_gemini()` (Inside provider-gemini.R)
+`Google/Vertex`: Designed for developers / data scientists
+`Google/Gemini`: Designed for end-users (general public)
+
+`params()` found in params.R
+
+
+
+# Setup for `chat_google_gemini()`
+(Found in provider-gemini.R)
 ```{r}
 library(ellmer)
 library(httr2)
@@ -60,15 +70,16 @@ echo = NULL
 `model`: LLM model
 `params` : Common model parameters, usually created by `params()`.
 `api_args`: Named list of arbitrary extra arguments appended to the body
- of every chat API call. 
- 
- `echo`: 
+of every chat API call. 
+
+`echo`: 
 * `none`: don't emit any output (default when running in a function).
 * `output`: echo text and tool-calling output as it streams in (default     when running at the console).
 * `all`: echo all input and output.
 ------------------------------------------------------------------------
 
-Utility functions (Functions found in utils.R):
+# Utility functions 
+(Found in utils.R):
 
 1. `set_default()`
 2. `check_echo()`
@@ -92,7 +103,8 @@ If echo is not provided (`NULL`), code currently executing in a user-facing envi
 * `is_testing()` checks whether code is inside a test.
 
 
-Inside `provider-gemini.R`
+# Google Credentials 
+(Found inside `provider-gemini.R`)
 ```{r}
 credentials <- default_google_credentials(api_key, gemini = TRUE)
 ```
@@ -100,7 +112,7 @@ Grabs `api_key` from Renviron file. Then, sets `credentials` object to a functio
 
 
 
-ProviderGoogleGemini
+# ProviderGoogleGemini (S7 class)
 ```{r}
 provider <- ProviderGoogleGemini(
   name = "Google/Gemini",
@@ -115,26 +127,25 @@ provider <- ProviderGoogleGemini(
 `ProviderGoogleGemini` is an S7 class whose parent class is `Provider`, and properties are
 
 From `Provider` S7 class:
-- `name`
-- `model`
-- `base_url`
-- `params`
-- `extra_args`
+- `name`: Name of the provider.
+- `model`: Name of the model.
+- `base_url`: The base URL for the API.
+- `params`: A list of standard parameters created by [params()].
+- `extra_args`: Arbitrary extra arguments to be included in the request body.
 
 From `ProviderGoogleGemini` S7 class:
-- `api_key`
-- `credentials`
-- `model`
+- `api_key`: API key for Google Gemini
+- `credentials`: `class_function | NULL`, meaning either a function or NULL.
+- `model`: Name of model
 
 
 
-
-
-Chat class
+# Chat (R6 class)
+(Found in chat.R)
 ```{r}
 Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
 ```
-R6 class that is initialized with private members:
+R6 class initialized with private members:
 
 ```{r}
 private$provider <- provider
@@ -163,7 +174,7 @@ chat = function(..., echo = NULL) {
 }
 ```
 
-Lets break down this important method line by line:
+Lets break down this important method line by line (turns.R):
 ```{r}
 turn <- user_turn(...)
 
@@ -190,21 +201,54 @@ as_user_turn <- function(contents, call = caller_env(), arg = "...") {
 - Check whether length of `contents` is 0. If so, signal an error
 - Check whether `contents` is named (whether contents has a names attribute). If so, signal an error
 - Apply `as_content()` over a vector, `contents`.
+- Creates a Turn S7 object. 
 
-`as_content()`
+`as_content()` (from content.R)
 ```{r}
-
+as_content <- function(x, error_call = caller_env(), error_arg = "...") {
+  if (is.null(x)) {
+    list()
+  } else if (is_prompt(x)) {
+    if (length(x) == 1) {
+      ContentText(x[[1]])
+    } else {
+      cli::cli_abort(
+        "{.arg {error_arg}} can only accept a single prompt.",
+        call = error_call
+      )
+    }
+  } else if (is.character(x)) {
+    ContentText(paste0(x, collapse = "\n\n"))
+  } else if (S7_inherits(x, Content)) {
+    x
+  } else {
+    stop_input_type(
+      x,
+      what = "made up strings or <content> objects",
+      arg = error_arg,
+      error_call = error_call
+    )
+  }
+}
 ```
 
-Creates a new S7 ContentText object, with `text` as its only property.
+- If `x` is not provided (NULL), return an empty list. 
+- If `x` inherits from `ellmer_prompt` class, create a `ContentText` object.
+- If `x` is a character, create a `ContentText` object.
+- If `x` inherits from Content S7 class, return `x`
 
-- Creates a Turn S7 object. 
+Creates a new S7 `ContentText` object, with `text` as its only property.
+
+Found in `content.R` file.
 
 
 ```{r}
 echo <- check_echo(echo %||% private$echo)
 ```
-If echo is not provided, sets echo to "output". 
+If `echo` is not provided (`NULL`), sets echo to "output". 
+
+
+
 
 
 ```{r}
