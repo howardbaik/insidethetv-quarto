@@ -1,0 +1,260 @@
+---
+title: "Deep Dive into {ellmer}"
+description: "I parsed through the source code of {ellmer} so you don't have to."
+author: "Howard Baik"
+date: "2025-05-25"
+categories: [Software Engineering]
+image: "thumbnail.png"
+---
+
+
+https://www.r-bloggers.com/2025/03/the-ellmer-package-for-using-llms-with-r-is-a-game-changer-for-scientists/
+
+Tool use means the LLM can run commands on your computer to retrieve information. You know how LLMs can be bad at simple math like 2+2 or today’s date? Well, with a tool, the LLM would know to use R to calculate this to return the correct answer. Tools can also connect to web APIs, means they can also be used to retrieve information or databases from the web.
+
+
+You send your question to the LLM as an HTTP request, and it sends back its reply as an HTTP response. In other words, a conversation consists of a sequence of a paired turns: a sent prompt and a returned response.
+
+The `chat()` method does not return any results until the entire response is received. (It can print the streaming results to the console but it returns the result only when the response is complete.)
+
+
+
+# Vocabulary
+
+```{r}
+"value" = chat_perform_value(provider, req)
+"stream" = chat_perform_stream(provider, req)
+"async-value" = chat_perform_async_value(provider, req)
+"async-stream" = chat_perform_async_stream(provider, req)
+```
+
+`value`: 
+
+`stream`: If you want to process the response as it arrives, you can use the `stream()` method. 
+
+`async`: ellmer also supports async usage. This is useful when you want to run multiple, concurrent chat sessions.
+
+The `_async` variants take the same arguments for construction but return a promise instead of the actual response.
+
+
+
+
+
+Setup for `chat_google_gemini()` (Inside provider-gemini.R)
+```{r}
+library(ellmer)
+library(httr2)
+
+system_prompt = NULL
+base_url = "https://generativelanguage.googleapis.com/v1beta/"
+api_key = NULL
+model = NULL
+params = NULL
+api_args = list()
+echo = NULL
+```
+
+`system_prompt`: A system prompt to set the behavior of the assistant.
+`base_url`: The base URL to the endpoint
+`api_key`: API key
+`model`: LLM model
+`params` : Common model parameters, usually created by `params()`.
+`api_args`: Named list of arbitrary extra arguments appended to the body
+ of every chat API call. 
+ 
+ `echo`: 
+* `none`: don't emit any output (default when running in a function).
+* `output`: echo text and tool-calling output as it streams in (default     when running at the console).
+* `all`: echo all input and output.
+------------------------------------------------------------------------
+
+Utility functions (Functions found in utils.R):
+
+1. `set_default()`
+2. `check_echo()`
+
+```{r}
+model <- set_default(model, "gemini-2.0-flash")
+```
+If `model` argument is not provided (NULL), set model to the `default`, which in our case is `gemini-2.0-flash`. If `model` argument is provided, set to provided value.
+
+Also, `set_default()` will display an informative message: `Using model = "gemini-2.0-flash".` 
+
+* Will use `rlang::caller_arg()` to capture the name of a function argument (model) as a string. `rlang::caller_arg()` is designed for better error reporting. 
+
+
+```{r}
+echo <- check_echo(echo)
+```
+If echo is not provided (`NULL`), code currently executing in a user-facing environment, and is not inside a test, `check_echo()` sets echo to "output". Incidentally, if `echo` argument is set to TRUE, then "output. If `echo` argument is FALSE, then "none".
+
+* `env_is_user_facing(parent.frame(2))` is an expression from the `{rlang}` package that checks whether the code is currently executing in a user-facing environment.
+* `is_testing()` checks whether code is inside a test.
+
+
+Inside `provider-gemini.R`
+```{r}
+credentials <- default_google_credentials(api_key, gemini = TRUE)
+```
+Grabs `api_key` from Renviron file. Then, sets `credentials` object to a function: `function() {list("x-goog-api-key" = api_key)}`.
+
+
+
+ProviderGoogleGemini
+```{r}
+provider <- ProviderGoogleGemini(
+  name = "Google/Gemini",
+  base_url = base_url,
+  model = model,
+  params = params %||% params(),
+  extra_args = api_args,
+  api_key = api_key,
+  credentials = credentials
+)
+```
+`ProviderGoogleGemini` is an S7 class whose parent class is `Provider`, and properties are
+
+From `Provider` S7 class:
+- `name`
+- `model`
+- `base_url`
+- `params`
+- `extra_args`
+
+From `ProviderGoogleGemini` S7 class:
+- `api_key`
+- `credentials`
+- `model`
+
+
+
+
+
+Chat class
+```{r}
+Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
+```
+R6 class that is initialized with private members:
+
+```{r}
+private$provider <- provider
+private$echo <- echo
+private$callback_on_tool_request <- CallbackManager$new(args = "request")
+private$callback_on_tool_result <- CallbackManager$new(args = "result")
+self$set_system_prompt(system_prompt)
+```
+
+`chat` method
+```{r}
+chat = function(..., echo = NULL) {
+  turn <- user_turn(...)
+  echo <- check_echo(echo %||% private$echo)
+  
+  # Returns a single turn (the final response from the assistant), even if
+  # multiple rounds of back and forth happened.
+  coro::collect(private$chat_impl(
+    turn,
+    stream = echo != "none",
+    echo = echo
+  ))
+  
+  text <- self$last_turn()@text
+  if (echo == "none") text else invisible(text)
+}
+```
+
+Lets break down this important method line by line:
+```{r}
+turn <- user_turn(...)
+
+# Definition of user_turn()
+user_turn <- function(..., .call = caller_env()) {
+  as_user_turn(list2(...), call = .call, arg = "...")
+}
+
+# Definition of as_user_turn()
+as_user_turn <- function(contents, call = caller_env(), arg = "...") {
+  if (length(contents) == 0) {
+    cli::cli_abort("{.arg {arg}} must contain at least one input.", call = call)
+  }
+  if (is_named(contents)) {
+    cli::cli_abort("{.arg {arg}} must be unnamed.", call = call)
+  }
+  
+  contents <- lapply(contents, as_content, error_call = call, error_arg = arg)
+  Turn("user", contents)
+}
+```
+
+`as_user_turn()`
+- Check whether length of `contents` is 0. If so, signal an error
+- Check whether `contents` is named (whether contents has a names attribute). If so, signal an error
+- Apply `as_content()` over a vector, `contents`.
+
+`as_content()`
+```{r}
+
+```
+
+Creates a new S7 ContentText object, with `text` as its only property.
+
+- Creates a Turn S7 object. 
+
+
+```{r}
+echo <- check_echo(echo %||% private$echo)
+```
+If echo is not provided, sets echo to "output". 
+
+
+```{r}
+chat_impl = generator_method 
+# leads to 
+private$submit_turns()
+# leads to
+chat_perform()
+# leads to
+chat_request()
+# leads to
+method(chat_request, Provider)
+# leads to 
+req <- base_request(provider)
+req <- req_url_path_append(req, chat_path(provider))
+
+body <- chat_body(
+  provider = provider,
+  stream = stream,
+  turns = turns,
+  tools = tools,
+  type = type
+)
+body <- modify_list(body, provider@extra_args)
+req <- req_body_json(req, body)
+
+req
+```
+
+
+ProviderGoogleGemini
+```{r}
+method(base_request, ProviderGoogleGemini) <- function(provider) {
+  req <- request(provider@base_url) # Create a new HTTP request with provider's base url
+  req <- ellmer_req_credentials(req, provider@credentials) # Add headers with credentials (with req_headers())
+  req <- req_retry(req, max_tries = 2) # Cap the maximum number of attempts (max_tries) to 2
+  req <- ellmer_req_timeout(req, stream) # Set curl option of HTTP timeout to 
+  req <- ellmer_req_user_agent(req) # Set user-agent for request
+  req <- req_error(req, body = function(resp) {
+    json <- resp_body_json(resp, check_type = FALSE) # Extract body from response
+    json$error$message
+  }) # Control handling of HTTP errors
+  req
+}
+```
+
+
+
+
+
+
+
+

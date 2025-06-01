@@ -6,6 +6,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/deep-dive-into-ellmer/index.html",
       "/posts/how-tracking-data-is-used-in-football/index.html",
       "/posts/my-r-journal/index.html",
       "/posts/automatic-detection-upwelling/index.html",
