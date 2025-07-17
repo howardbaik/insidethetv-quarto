@@ -13,7 +13,6 @@ https://www.r-bloggers.com/2025/03/the-ellmer-package-for-using-llms-with-r-is-a
 
 Tool use means the LLM can run commands on your computer to retrieve information. You know how LLMs can be bad at simple math like 2+2 or today’s date? Well, with a tool, the LLM would know to use R to calculate this to return the correct answer. Tools can also connect to web APIs, means they can also be used to retrieve information or databases from the web.
 
-
 You send your question to the LLM as an HTTP request, and it sends back its reply as an HTTP response. In other words, a conversation consists of a sequence of a paired turns: a sent prompt and a returned response.
 
 The `chat()` method does not return any results until the entire response is received. (It can print the streaming results to the console but it returns the result only when the response is complete.)
@@ -78,15 +77,18 @@ of every chat API call.
 * `all`: echo all input and output.
 ------------------------------------------------------------------------
 
+
 # Utility functions 
 (Found in utils.R):
 
 1. `set_default()`
 2. `check_echo()`
 
+## Model
 ```{r}
 model <- set_default(model, "gemini-2.0-flash")
 ```
+
 If `model` argument is not provided (NULL), set model to the `default`, which in our case is `gemini-2.0-flash`. If `model` argument is provided, set to provided value.
 
 Also, `set_default()` will display an informative message: `Using model = "gemini-2.0-flash".` 
@@ -94,25 +96,28 @@ Also, `set_default()` will display an informative message: `Using model = "gemin
 * Will use `rlang::caller_arg()` to capture the name of a function argument (model) as a string. `rlang::caller_arg()` is designed for better error reporting. 
 
 
+## Echo
 ```{r}
 echo <- check_echo(echo)
 ```
-If echo is not provided (`NULL`), code currently executing in a user-facing environment, and is not inside a test, `check_echo()` sets echo to "output". Incidentally, if `echo` argument is set to TRUE, then "output. If `echo` argument is FALSE, then "none".
+
+If echo is not provided (`NULL`), code currently executing in a user-facing environment, and is not inside a test, `check_echo()` sets echo to "output". Incidentally, if `echo` argument is set to TRUE, then echo is set to "output". If `echo` argument is FALSE, then "none".
 
 * `env_is_user_facing(parent.frame(2))` is an expression from the `{rlang}` package that checks whether the code is currently executing in a user-facing environment.
 * `is_testing()` checks whether code is inside a test.
 
 
 # Google Credentials 
-(Found inside `provider-gemini.R`)
+Found in `provider-gemini.R`
 ```{r}
 credentials <- default_google_credentials(api_key, gemini = TRUE)
 ```
+
 Grabs `api_key` from Renviron file. Then, sets `credentials` object to a function: `function() {list("x-goog-api-key" = api_key)}`.
 
 
-
 # ProviderGoogleGemini (S7 class)
+Found in `provider-gemini.R`
 ```{r}
 provider <- ProviderGoogleGemini(
   name = "Google/Gemini",
@@ -124,7 +129,8 @@ provider <- ProviderGoogleGemini(
   credentials = credentials
 )
 ```
-`ProviderGoogleGemini` is an S7 class whose parent class is `Provider`, and properties are
+
+`ProviderGoogleGemini` is an S7 class whose parent class is `Provider`, and whose properties are
 
 From `Provider` S7 class:
 - `name`: Name of the provider.
@@ -139,12 +145,12 @@ From `ProviderGoogleGemini` S7 class:
 - `model`: Name of model
 
 
-
 # Chat (R6 class)
-(Found in chat.R)
+Found in chat.R
 ```{r}
 Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
 ```
+
 R6 class initialized with private members:
 
 ```{r}
@@ -155,7 +161,7 @@ private$callback_on_tool_result <- CallbackManager$new(args = "result")
 self$set_system_prompt(system_prompt)
 ```
 
-`chat` method
+## chat method (from Chat R6 class)
 ```{r}
 chat = function(..., echo = NULL) {
   turn <- user_turn(...)
@@ -179,6 +185,7 @@ Lets break down this important method line by line (turns.R):
 turn <- user_turn(...)
 
 # Definition of user_turn()
+# Found in turns.R
 user_turn <- function(..., .call = caller_env()) {
   as_user_turn(list2(...), call = .call, arg = "...")
 }
@@ -191,6 +198,9 @@ as_user_turn <- function(contents, call = caller_env(), arg = "...") {
   if (is_named(contents)) {
     cli::cli_abort("{.arg {arg}} must be unnamed.", call = call)
   }
+  if (S7_inherits(contents, Content)) {
+    return(Turn("user", list(contents)))
+  }
   
   contents <- lapply(contents, as_content, error_call = call, error_arg = arg)
   Turn("user", contents)
@@ -199,9 +209,10 @@ as_user_turn <- function(contents, call = caller_env(), arg = "...") {
 
 `as_user_turn()`
 - Check whether length of `contents` is 0. If so, signal an error
-- Check whether `contents` is named (whether contents has a names attribute). If so, signal an error
-- Apply `as_content()` over a vector, `contents`.
+- Check whether `contents` is named (whether contents has a names attribute). If so, signal an error.
+- Apply `as_content()` over a list, `contents`.
 - Creates a Turn S7 object. 
+
 
 `as_content()` (from content.R)
 ```{r}
@@ -239,31 +250,43 @@ as_content <- function(x, error_call = caller_env(), error_arg = "...") {
 
 Creates a new S7 `ContentText` object, with `text` as its only property.
 
-Found in `content.R` file.
 
-
+Echo
 ```{r}
 echo <- check_echo(echo %||% private$echo)
 ```
 If `echo` is not provided (`NULL`), sets echo to "output". 
 
-
-
+* `rlang::%||%` is the null-default operator. It returns the left-hand side if it’s not NULL, otherwise it returns the right-hand side.
 
 
 ```{r}
 chat_impl = generator_method 
 # leads to 
-private$submit_turns()
+private$submit_turns() # generator method
 # leads to
 chat_perform()
 # leads to
-chat_request()
+chat_request() # generic
 # leads to
-method(chat_request, Provider)
-# leads to 
-req <- base_request(provider)
-req <- req_url_path_append(req, chat_path(provider))
+req <- base_request(provider) # generic
+
+# Can't use chat_path() because it varies based on stream
+req <- req_url_path_append(req, "models")
+if (stream) {
+  # https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
+  req <- req_url_path_append(
+    req,
+    paste0(provider@model, ":", "streamGenerateContent")
+  )
+  req <- req_url_query(req, alt = "sse")
+} else {
+  # https://ai.google.dev/api/generate-content#method:-models.generatecontent
+  req <- req_url_path_append(
+    req,
+    paste0(provider@model, ":", "generateContent")
+  )
+}
 
 body <- chat_body(
   provider = provider,
@@ -273,13 +296,16 @@ body <- chat_body(
   type = type
 )
 body <- modify_list(body, provider@extra_args)
-req <- req_body_json(req, body)
 
+req <- req_body_json(req, body)
 req
 ```
 
+`chat_impl` is the 'chat implementation' function that does the heavy lifting behind the user-facing `chat()` method. It is a "generator method".
 
-ProviderGoogleGemini
+`submit_turns` is a "generator method" that contains `chat_perform()`, which leads to `chat_request()`
+
+`req <- base_request(provider)` for `provider = ProviderGoogleGemini`
 ```{r}
 method(base_request, ProviderGoogleGemini) <- function(provider) {
   req <- request(provider@base_url) # Create a new HTTP request with provider's base url
@@ -296,9 +322,68 @@ method(base_request, ProviderGoogleGemini) <- function(provider) {
 ```
 
 
+```{r}
+req <- req_url_path_append(req, "models")
+```
 
+Adds `/models` to URL path
 
+```{r}
+req <- req_url_path_append(
+  req,
+  paste0(provider@model, ":", "generateContent")
+)
+```
 
+Adds `paste0(provider@model, ":", "generateContent")` to path.
+
+```{r}
+body <- chat_body(
+  provider = provider,
+  stream = stream,
+  turns = turns,
+  tools = tools,
+  type = type
+)
+# leads to
+method(chat_body, ProviderGoogleGemini) <- function(
+    provider,
+    stream = TRUE,
+    turns = list(),
+    tools = list(),
+    type = NULL
+) {
+  if (length(turns) >= 1 && is_system_prompt(turns[[1]])) {
+    system <- list(parts = list(text = turns[[1]]@text))
+  } else {
+    system <- list(parts = list(text = ""))
+  }
+  
+  generation_config <- chat_params(provider, provider@params)
+  if (!is.null(type)) {
+    generation_config$response_mime_type <- "application/json"
+    generation_config$response_schema <- as_json(provider, type)
+  }
+  
+  contents <- as_json(provider, turns)
+  
+  # https://ai.google.dev/api/caching#Tool
+  if (length(tools) > 0) {
+    funs <- as_json(provider, unname(tools))
+    tools <- list(functionDeclarations = funs)
+  } else {
+    tools <- NULL
+  }
+  
+  compact(list(
+    contents = contents,
+    tools = tools,
+    systemInstruction = system,
+    generationConfig = generation_config
+  ))
+}
+
+```
 
 
 
