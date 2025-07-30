@@ -314,24 +314,23 @@ The remainder of the blog post focuses on the functions that power the `$chat()`
 
 
 ```{r}
-chat_impl = generator_method()
+# If stream = TRUE, yields completion deltas. If stream = FALSE, yields
+# complete assistant turns.
+chat_impl = generator_method(function(
+      self,
+      private,
+      user_turn,
+      stream,
+      echo,
+      yield_as_content = FALSE
+    ) 
+      
+```
 
-turn <- turn
-stream <- TRUE
-echo <- "output"
+Leads to
 
-# leads to 
-  assistant_chunks <- private$submit_turns(
-          user_turn,
-          stream = stream,
-          echo = echo,
-          yield_as_content = yield_as_content
-  )
-for (chunk in assistant_chunks) {
-  yield(chunk)
-}
-        
-# leads to
+
+```{r}
 response <- chat_perform(
   provider = private$provider
   mode = if (stream) "stream" else "value",
