@@ -308,7 +308,7 @@ NOTE: `rlang::%||%` is the "null-default" operator. It returns the left-hand sid
 
 ## Chat Implementation
 
-The rest of the blog post focuses on functions that implement the `$chat()` method. The functions are somewhat rabbit holes, so I've organized all the relevent, major functions to be discussed in this diagram:
+The remainder of the blog post focuses on the functions that power the `$chat()` method. Since the functions can lead to rabbit holes, I've organized the key ones into this diagram:
 
 ![](img/diagram.png)
 
