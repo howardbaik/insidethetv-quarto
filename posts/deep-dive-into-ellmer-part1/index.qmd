@@ -92,13 +92,11 @@ set_default <- function(value, default, arg = caller_arg(value)) {
 }
 ```
 
-If the `model` argument is `NULL`, set `model` to the `default` value, which as of this writing is `gemini-2.5-flash`. Also, an informative message of the model in use is displayed : `Using model = "gemini-2.5-flash".`
+If the `model` argument is `NULL`, it defaults to `gemini-2.5-flash`(the default as of this writing) and an informative message is displayed : `Using model = "gemini-2.5-flash"`. If `model` value is provided, that value is used.
 
 NOTE: Will use `rlang::caller_arg()` to capture the name of a function argument (model) as a string. `rlang::caller_arg()` is designed for better error reporting.
 
-Otherwise, if the `model` argument is provided, `model` is set to the provided value.
 
-In this blog post, we will not be providing the `model` argument and simply setting the model to the default model, which, as of 07/28/2025, is `gemini-2.5-flash`.
 
 ### Configure Echo
 
@@ -136,11 +134,10 @@ check_echo <- function(echo = NULL) {
 }
 ```
 
-If `echo` is not provided (`NULL`) and then code is currently executing in a user-facing environment, `check_echo()` sets `echo` to `output`.
+If `echo` is `NULL` and then code is currently executing in a user-facing environment, `check_echo()` sets the `echo` object to `output`. If `echo` argument is set to `TRUE`, then the `echo` object is set to `output` and if `FALSE`, then `echo` is set to `none`.
 
-Incidentally, if `echo` argument is set to TRUE, then echo is set to `output` and if `echo` argument is FALSE, then `none`.
+NOTE: `rlang::env_is_user_facing(parent.frame(2))` checks whether the code is currently executing in a user-facing environment.
 
-NOTE: `env_is_user_facing(parent.frame(2))` is an expression from the `{rlang}` package that checks whether the code is currently executing in a user-facing environment.
 
 ### Set Google Credentials
 
@@ -148,15 +145,11 @@ NOTE: `env_is_user_facing(parent.frame(2))` is an expression from the `{rlang}` 
 credentials <- default_google_credentials(api_key, gemini = TRUE)
 ```
 
-Grabs `api_key` from Renviron file. Then, sets `credentials` object to a function: `function() {list("x-goog-api-key" = api_key)}`.
+Grabs `api_key` from Renviron file. Then, sets `credentials` object to `function() {list("x-goog-api-key" = api_key)}`.
 
 
 
 ## ProviderGoogleGemini 
-
-(S7 class)
-
-Found in `provider-google.R`
 
 ```{r}
 provider <- ProviderGoogleGemini(
@@ -170,21 +163,29 @@ provider <- ProviderGoogleGemini(
 )
 ```
 
-`ProviderGoogleGemini` is an S7 class whose parent class is `Provider`, and properties are
+`ProviderGoogleGemini` is an S7 class whose parent class is `Provider` and has the following properties:
 
-From `Provider` S7 class: - `name`: Name of the provider. - `model`: Name of the model. - `base_url`: The base URL for the API. - `params`: A list of standard parameters created by \[params()\]. - `extra_args`: Arbitrary extra arguments to be included in the request body.
+From the `Provider` S7 class: 
+- `name`: Name of the provider. 
+- `model`: Name of the model. 
+- `base_url`: The base URL for the API. 
+- `params`: A list of standard parameters created by `params()`. 
+- `extra_args`: Arbitrary extra arguments to be included in the request body.
+- `extra_headers`: Arbitrary extra headers to be added to the request.
 
-From `ProviderGoogleGemini` S7 class: - `api_key`: API key for Google Gemini - `credentials`: `class_function | NULL`, meaning either a function or NULL. - `model`: Name of model
+From the `ProviderGoogleGemini` S7 class: 
+- `api_key`: API key for Google Gemini 
+- `credentials`: `class_function | NULL`, meaning either a function or `NULL`. 
+- `model`: Name of model
 
-## Chat (R6 class)
 
-Found in chat.R
+## Chat R6 class
 
 ```{r}
 Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
 ```
 
-R6 class initialized with private members:
+This is an R6 class initialized with private members:
 
 ```{r}
 private$provider <- provider
@@ -194,19 +195,20 @@ private$callback_on_tool_result <- CallbackManager$new(args = "result")
 self$set_system_prompt(system_prompt)
 ```
 
-Since our focus is not on tool-calling, let's table the callback and focus on provider, echo, and set_system_prompt().
+Since tool-calling is not the focus of this blog post, we'll set the callback aside and focus on `provider`, `echo`, and `$set_system_prompt(system_prompt)`.
 
-`set_system_prompt()` removes existing system prompt and adds new system prompt (if non-`NULL`).
+- `provider` refers to the S7 class initialized earlier
+- `echo` is assigned the value of `output`.
+- `$set_system_prompt()` removes any existing system prompt and adds a new system prompt (if `system_prompt` is not `NULL`).
 
-## chat method (from Chat R6 class)
 
-Inside `user_turn(...)`, the `user_prompt` is provided. In this blog post, the user prompt will be "Who created the R programming language?"
+## $chat() method
+
+Once the Chat R6 class is initiated (`chat <- chat_google_gemini()`), we run the `$chat() method`, which accepts an user prompt. Inside `user_turn(...)`, the `user_prompt` is provided. In this blog post, the user prompt will be `"Who created the R programming language?"`.
 
 Hint: R was created by Ross Ihaka and Robert Gentleman at the University of Auckland in New Zealand.
 
 ```{r}
-user_prompt <- "Who created the R programming language?"
-
 chat = function(..., echo = NULL) {
   turn <- user_turn(...)
   echo <- check_echo(echo %||% private$echo)
@@ -224,13 +226,10 @@ chat = function(..., echo = NULL) {
 }
 ```
 
-Lets break down this important method line by line (turns.R):
+First, lets dig into the `user_turn()` function:
 
 ```{r}
-turn <- user_turn(...)
-
 # Definition of user_turn()
-# Found in turns.R
 user_turn <- function(..., .call = caller_env()) {
   as_user_turn(list2(...), call = .call, arg = "...")
 }
@@ -252,10 +251,14 @@ as_user_turn <- function(contents, call = caller_env(), arg = "...") {
 }
 ```
 
-`as_user_turn()` - Check whether length of `contents` is 0. If so, signal an error - Check whether `contents` is named (whether contents has a names attribute). If so, signal an error. - Apply `as_content()` over a list, `contents`. - Creates a `Turn` S7 object.
+`as_user_turn()` 
+1. Checks whether length of `contents` is 0. If so, signal an error 
+2. Check whether `contents` is named (whether contents has a names attribute). If so, signal an error. 
+3. Apply `as_content()` over `contents`
+4. Create a `Turn` S7 object from `contents`. A `Turn` object contains a list of `Content`s representing the individual messages (text, images, tools) within the turn.
 
-`as_content()` (from content.R)
 
+`as_content()`
 ```{r}
 as_content <- function(x, error_call = caller_env(), error_arg = "...") {
   if (is.null(x)) {
@@ -284,12 +287,12 @@ as_content <- function(x, error_call = caller_env(), error_arg = "...") {
 }
 ```
 
--   If `x` is not provided (`NULL`), return an empty list.
--   If `x` inherits from `ellmer_prompt` class, create a `ContentText` object.
--   If `x` is a character, create a `ContentText` object.
--   If `x` inherits from Content S7 class, return `x`
+- If `x` is `NULL`, return an empty list.
+- If `x` inherits from the `ellmer_prompt` class, create a `ContentText` object.
+- If `x` is a character, create a `ContentText` object.
+- If `x` inherits from Content S7 class, return `x`
 
-Creates a new S7 `ContentText` object, with `text` as its only property and `Content` as its parent.
+`as_content()` creates a new S7 `ContentText` object, with `text` as its only property.
 
 Echo
 
@@ -297,13 +300,18 @@ Echo
 echo <- check_echo(echo %||% private$echo)
 ```
 
-If `echo` is not provided (`NULL`), sets echo to `private$echo`, which is `output`.
+If `echo` is `NULL`, this line sets echo to `private$echo`, which is `output`.
 
-NOTE: `rlang::%||%` is the null-default operator. It returns the left-hand side if it’s not NULL, otherwise it returns the right-hand side.
+NOTE: `rlang::%||%` is the "null-default" operator. It returns the left-hand side if it’s not NULL, otherwise it returns the right-hand side.
+
+
 
 ## Chat Implementation
 
-chat_impl()
+The rest of the blog post focuses on functions that implement the `$chat()` method. The functions are somewhat rabbit holes, so I've organized all the relevent, major functions to be discussed in this diagram:
+
+![](img/diagram.png)
+
 
 ```{r}
 chat_impl = generator_method()
