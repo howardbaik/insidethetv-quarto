@@ -413,7 +413,7 @@ method(base_request, ProviderGoogleGemini) <- function(provider) {
 7. Control handling of HTTP errors by returning a character vector of the error message.
 
 
-After base_request() is run,
+After base_request() is run, the `req` object is as follows:
 ```r
 <httr2_request>
 GET https://generativelanguage.googleapis.com/v1beta/
@@ -439,7 +439,7 @@ Note that this is a GET request, so the body is empty. The base URL is defined, 
 req <- req_url_path_append(req, "models")
 ```
 
-Adds `/models` to the path
+Adds `/models` to the path.
 
 Since `stream` is `TRUE`, we have the following:
 
@@ -452,11 +452,13 @@ req <- req_url_path_append(
 req <- req_url_query(req, alt = "sse")
 ```
 
-Adds `paste0(provider@model, ":", "generateContent")` and `?alt=sse` to path.
+Appends `paste0(provider@model, ":", "generateContent")` and `?alt=sse` to the request path.
 
-The `?alt=sse` parameter in that Google Gemini API URL specifies the response format as Server-Sent Events (SSE).
+The `?alt=sse` query parameter specifies the response should be returned using Server-Sent Events (SSE), allowing data to be streamed incrementally as it is generated, rather than waiting for the full response.
 
-Return the response as a streaming format using Server-Sent Events (`sse`). Send data incrementally as it's generated, rather than waiting for the complete response
+Together, these functions reconstruct the URL found in the Example Request from the [Google AI Documentation](https://ai.google.dev/api/generate-content?authuser=1#example-request_1).
+
+With the request URL completely constructed, we move on to constructing the body of the request with `chat_body()`, another S7 generic. The method shown below is its implementation for the `ProviderGoogleGemini` class.
 
 ```{r}
 # generic
@@ -475,10 +477,10 @@ method(chat_body, ProviderGoogleGemini) <- function(
     tools = list(),
     type = NULL
 ) {
-  if (length(turns) >= 1 && is_system_prompt(turns[[1]])) { # if system prompt exists,
-    system <- list(parts = list(text = turns[[1]]@text))    # assign sytstem to text of system prompt
+  if (length(turns) >= 1 && is_system_prompt(turns[[1]])) { 
+    system <- list(parts = list(text = turns[[1]]@text))  
   } else {
-    system <- list(parts = list(text = "")) # if system prompt doesn't exist, assign blank character
+    system <- list(parts = list(text = ""))
   }
   
   generation_config <- chat_params(provider, provider@params)
@@ -507,11 +509,13 @@ method(chat_body, ProviderGoogleGemini) <- function(
 
 ```
 
-https://ai.google.dev/api/generate-content?authuser=1#request-body_1
+Converts R objects into the JSON format expected by Google’s Gemini API for chat conversations, as described in the [Google AI documentation](https://ai.google.dev/api/generate-content?authuser=1#request-body_1) under "Request body."
 
-Transforms R objects into the JSON structure that Google's Gemini API expects for chat conversations.
+1. If a system prompt is provided, assign its text to the `system` object; otherwise, assign an empty string.
+2. Define configuration options for model generation and outputs.
+3. Format `contents` as JSON. 
+4. Since tool-calling is not being used, set `tools` to `NULL`. 
 
-`contents` is structured as JSON. Since we are not calling tools, `tools` is `NULL`. No system prompt, so `system <- list(parts = list(text = ""))` `generationConfig = list()`
 
 ```{r}
 body <- modify_list(body, provider@extra_args)
@@ -520,24 +524,13 @@ req <- req_body_json(req, body)
 req <- req_headers(req, !!!provider@extra_headers)
 ```
 
-`modify_list()` modifies `body`, a list, by updating it with values from `provider@extra_args` `req <- req_body_json(req, body)`: Sends the `body` object in JSON encoded data. `req <- req_headers(req, !!!provider@extra_headers)`: Set value of any headers
+1. `modify_list()` modifies `body`, a list, by updating it with values from `provider@extra_args` 
+2.  Sends the `body` object in JSON encoded data. 
+3.  Set value of any headers
 
-After `chat_request()` is run and we have `req`, since `mode` is `stream`, we run `chat_perform_stream(provider, req)`:
 
-```{r}
-"value" = chat_perform_value(provider, req)
-"stream" = chat_perform_stream(provider, req)
-"async-value" = chat_perform_async_value(provider, req)
-"async-stream" = chat_perform_async_stream(provider, req)
-```
 
-`value`:
-
-`stream`: If you want to process the response as it arrives, you can use the `stream()` method.
-
-`async`: ellmer also supports async usage. This is useful when you want to run multiple, concurrent chat sessions.
-
-The `_async` variants take the same arguments for construction but return a promise instead of the actual response.
+After `chat_request()` is run and `req` is completely constructed, we run `chat_perform_stream(provider, req)` since `mode` is set to `stream`:
 
 ```{r}
 on_load(
