@@ -5,6 +5,8 @@ author: "Howard Baik"
 date: "2025-07-29"
 categories: [Software Engineering]
 image: "thumbnail.png"
+execute:
+  eval: false
 ---
 
 ## Introduction
@@ -63,16 +65,15 @@ Arguments
 - `none`: don't emit any output (default when running in a function). 
 - `output`: echo text and tool-calling output as it streams in (default when running at the console). 
 - `all`: echo all input and output.
-------------------------------------------------------------------------
 
 
 ## Utility functions
 
 The following functions create the `model`, `echo`, and `credentials` objects:
 
-1.  `set_default()`
-2.  `check_echo()`
-3.  `default_google_credentials()`
+1.  `model`: `set_default()`
+2.  `echo`: `check_echo()`
+3.  `credentials`: `default_google_credentials()`
 
 ### Choose Model
 
@@ -312,7 +313,7 @@ The remainder of the blog post focuses on the functions that power the `$chat()`
 
 ![](img/diagram.png)
 
-
+We first start with `chat_impl`, which is a `generator_method`, similar to a `coro::generator`. Generators create iterator functions, which are functions you can call to return a new value. You can learn more about generators in the [coro documentation](https://coro.r-lib.org/articles/generator.html#generators).
 ```{r}
 # If stream = TRUE, yields completion deltas. If stream = FALSE, yields
 # complete assistant turns.
@@ -327,7 +328,7 @@ chat_impl = generator_method(function(
       
 ```
 
-Leads to
+Within `chat_impl` is another major method (function), `$submit_turns()`, which contains `chat_perform()`. 
 
 
 ```{r}
@@ -340,70 +341,80 @@ response <- chat_perform(
   tools = if (is.null(type)) private$tools,
   type = type 
 )
-
-# leads to
-chat_request() # generic
-
-# leads to
-req <- base_request(provider) # generic
-
-# Can't use chat_path() because it varies based on stream
-req <- req_url_path_append(req, "models")
-if (stream) {
-  # https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
-  req <- req_url_path_append(
-    req,
-    paste0(provider@model, ":", "streamGenerateContent")
-  )
-  req <- req_url_query(req, alt = "sse")
-} else {
-  # https://ai.google.dev/api/generate-content#method:-models.generatecontent
-  req <- req_url_path_append(
-    req,
-    paste0(provider@model, ":", "generateContent")
-  )
-}
-
-body <- chat_body(
-  provider = provider,
-  stream = stream,
-  turns = turns,
-  tools = tools,
-  type = type
-)
-body <- modify_list(body, provider@extra_args)
-
-req <- req_body_json(req, body)
-req
 ```
 
-`chat_impl` is the 'chat implementation' function that does the heavy lifting behind the user-facing `chat()` method. It is a "generator method".
-
-`submit_turns` is another "generator method" that contains `chat_perform()`, which leads to `chat_request()`
-
-`req <- base_request(provider)` for `provider = ProviderGoogleGemini`
-
-https://ai.google.dev/api/generate-content?authuser=1#method:-models.streamgeneratecontent
+`chat_perform()` leads to `chat_request()`, an S7 generic, and the method shown below is its implementation for the `ProviderGoogleGemini` class.
 
 ```{r}
-method(base_request, ProviderGoogleGemini) <- function(provider) {
-  req <- request(provider@base_url) # Create a new HTTP request with provider's base url
-  req <- ellmer_req_credentials(req, provider@credentials) # Add headers with credentials (with req_headers())
-  req <- req_retry(req, max_tries = 2) # Cap the maximum number of attempts (max_tries) to 2
-  req <- ellmer_req_timeout(req, stream) # Set curl option of HTTP timeout to 
-  req <- ellmer_req_user_agent(req) # Set user-agent for request
-  req <- req_error(req, body = function(resp) {
-    json <- resp_body_json(resp, check_type = FALSE) # Extract body from response
-    json$error$message
-  }) # Control handling of HTTP errors
+method(chat_request, ProviderGoogleGemini) <- function(
+  provider,
+  stream = TRUE,
+  turns = list(),
+  tools = list(),
+  type = NULL
+) {
+  req <- base_request(provider)
+
+  # Can't use chat_path() because it varies based on stream
+  req <- req_url_path_append(req, "models")
+  if (stream) {
+    # https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
+    req <- req_url_path_append(
+      req,
+      paste0(provider@model, ":", "streamGenerateContent")
+    )
+    req <- req_url_query(req, alt = "sse")
+  } else {
+    # https://ai.google.dev/api/generate-content#method:-models.generatecontent
+    req <- req_url_path_append(
+      req,
+      paste0(provider@model, ":", "generateContent")
+    )
+  }
+
+  body <- chat_body(
+    provider = provider,
+    stream = stream,
+    turns = turns,
+    tools = tools,
+    type = type
+  )
+  body <- modify_list(body, provider@extra_args)
+
+  req <- req_body_json(req, body)
+  req <- req_headers(req, !!!provider@extra_headers)
   req
 }
 ```
 
-chat_request(): After base_request() is run,
+`base_request()` is an S7 generic, and the method shown below is its implementation for the `ProviderGoogleGemini` class.
 
 ```{r}
-> req 
+method(base_request, ProviderGoogleGemini) <- function(provider) {
+  req <- request(provider@base_url) 
+  req <- ellmer_req_credentials(req, provider@credentials) 
+  req <- req_retry(req, max_tries = 2)
+  req <- ellmer_req_timeout(req, stream) 
+  req <- ellmer_req_user_agent(req) # 
+  req <- req_error(req, body = function(resp) {
+    json <- resp_body_json(resp, check_type = FALSE) 
+    json$error$message
+  }) 
+  req
+}
+```
+
+`base_request()`
+1. Creates a new HTTP request with provider's base url
+2. Adds headers with credentials (with `req_headers()`)
+3. Caps the maximum number of attempts (max_tries) to 2
+4. Set curl option of HTTP timeout to 5 minutes
+6. Set user-agent for request (`r-ellmer/0.3.0.900`)
+7. Control handling of HTTP errors by returning a character vector of the error message.
+
+
+After base_request() is run,
+```r
 <httr2_request>
 GET https://generativelanguage.googleapis.com/v1beta/
 Headers:
@@ -422,13 +433,15 @@ Policies:
 * error_body             : <function>
 ```
 
+Note that this is a GET request, so the body is empty. The base URL is defined, and additional parameters will be appended to it.  
+
 ```{r}
 req <- req_url_path_append(req, "models")
 ```
 
-chat_request(): Add `/models` to URL path
+Adds `/models` to the path
 
-Since `stream` is `TRUE`,
+Since `stream` is `TRUE`, we have the following:
 
 ```{r}
 req <- req_url_path_append(
@@ -547,7 +560,7 @@ on_load(
 
 `req_perform_connection(req)`: Perform a request and return a streaming connection
 
-```{r}
+```r
 <httr2_response>
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
 Status: 200 OK
@@ -557,7 +570,7 @@ Body: Streaming connection
 
 `chat_resp_stream()` reads a single server-sent event (https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
 
-```{r}
+```r
 $type
 [1] "message"
 
@@ -567,5 +580,7 @@ $data
 $id
 [1] ""
 ```
+
+
 
 `stream_parse()` parses a JSON string and converts it into R objects.
