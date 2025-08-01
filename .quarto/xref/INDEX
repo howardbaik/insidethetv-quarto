@@ -88,5 +88,8 @@
   },
   "posts/deep-dive-into-ellmer/index.qmd": {
     "index.html": "6c9dd32f"
+  },
+  "posts/deep-dive-into-ellmer-part1/index.qmd": {
+    "index.html": "cafbd1bf"
   }
 }

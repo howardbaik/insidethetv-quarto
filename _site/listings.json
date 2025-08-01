@@ -6,7 +6,7 @@
   {
     "listing": "/blog.html",
     "items": [
-      "/posts/deep-dive-into-ellmer/index.html",
+      "/posts/deep-dive-into-ellmer-part1/index.html",
       "/posts/how-tracking-data-is-used-in-football/index.html",
       "/posts/my-r-journal/index.html",
       "/posts/automatic-detection-upwelling/index.html",
@@ -17,8 +17,8 @@
       "/posts/difference-regular-season-playoffs-extended/index.html",
       "/posts/difference-regular-season-playoffs/index.html",
       "/posts/analyzing-twitter-accounts/index.html",
-      "/posts/summary-data-mining-paper/index.html",
       "/posts/are-teams-getting-lucky-on-rushes/index.html",
+      "/posts/summary-data-mining-paper/index.html",
       "/posts/wine-quality-prediction/index.html"
     ]
   }
