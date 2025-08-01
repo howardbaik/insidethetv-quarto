@@ -3,7 +3,7 @@ title: "Deep Dive into {ellmer}: Part 1"
 description: "I parsed through the source code of {ellmer} so you don't have to."
 author: "Howard Baik"
 date: "2025-08-04"
-categories: [Software Engineering]
+categories: [ellmer]
 image: "thumbnail.png"
 execute:
   eval: false
@@ -11,7 +11,7 @@ execute:
 
 ## Introduction
 
-ellmer is an R package designed to easily call LLM APIs from R. It supports a wide variety of model providers, including [Google Gemini/Vertex AI](https://ellmer.tidyverse.org/reference/chat_google_gemini.html), [Anthropic Claude](https://ellmer.tidyverse.org/reference/chat_anthropic.html), [OpenAI](https://ellmer.tidyverse.org/reference/chat_openai.html), and [Ollama](https://ellmer.tidyverse.org/reference/chat_ollama.html). Although there are many resources on using ellmer for tasks like chatting with AIs, as of this writing, there is no explanation on how ellmer works behind the scenes.
+[ellmer](https://ellmer.tidyverse.org/){target="_blank"} is an R package designed to easily call LLM APIs from R. It supports a wide variety of model providers, including [Google Gemini/Vertex AI](https://ellmer.tidyverse.org/reference/chat_google_gemini.html){target="_blank"}, [Anthropic Claude](https://ellmer.tidyverse.org/reference/chat_anthropic.html){target="_blank"}, [OpenAI](https://ellmer.tidyverse.org/reference/chat_openai.html){target="_blank"}, and [Ollama](https://ellmer.tidyverse.org/reference/chat_ollama.html){target="_blank"}. Although there are many resources on using ellmer for tasks like chatting with AIs, as of this writing, there is no explanation on how ellmer works behind the scenes.
 
 This blog series will dive deep into the source code of ellmer, aiming to build an understanding of how ellmer interfaces with LLM APIs. We will use the Google Gemini API, which provides a generous free tier.
 
@@ -150,7 +150,7 @@ check_echo <- function(echo = NULL) {
 credentials <- default_google_credentials(api_key, gemini = TRUE)
 ```
 
-`default_google_credentials()` grabs `api_key` from an .Renviron file. Then, it sets the `credentials` object to `function() {list("x-goog-api-key" = api_key)}`.
+`default_google_credentials()` grabs the `api_key` from an .Renviron file. Then, it sets the `credentials` object to `function() {list("x-goog-api-key" = api_key)}`.
 
 
 ## ProviderGoogleGemini
@@ -181,7 +181,7 @@ From the `Provider` S7 class:
 From the `ProviderGoogleGemini` S7 class: 
 
 - `api_key`: API key for Google Gemini 
-- `credentials`: `class_function | NULL`, meaning either a function or `NULL`. 
+- `credentials`: `class_function | NULL`, meaning either a function class or `NULL`. 
 - `model`: Name of model
 
 
@@ -203,7 +203,7 @@ self$set_system_prompt(system_prompt)
 
 Since tool-calling is not the focus of this blog post, we'll set the callback aside and focus on `provider`, `echo`, and `$set_system_prompt(system_prompt)`.
 
--   `provider` refers to the S7 class initialized earlier
+-   `provider` refers to the S7 class initialized earlier.
 -   `echo` is assigned the value of `output`.
 -   `$set_system_prompt()` removes any existing system prompt and adds a new system prompt (if `system_prompt` is not `NULL`).
 
@@ -260,7 +260,7 @@ as_user_turn <- function(contents, call = caller_env(), arg = "...") {
 }
 ```
 
-`as_user_turn()` 
+`as_user_turn()`:
 
 1. Checks whether length of `contents` is 0. If so, signal an error. 
 2. Check whether `contents` is named (whether contents has a names attribute). If so, signal an error. 
@@ -268,7 +268,7 @@ as_user_turn <- function(contents, call = caller_env(), arg = "...") {
 4. Create a `Turn` S7 object from `contents`. A `Turn` object contains a list of `Content`s representing the individual messages (text, images, tools) within the turn.
 
 
-`as_content()`
+`as_content()`:
 
 ```{r}
 as_content <- function(x, error_call = caller_env(), error_arg = "...") {
@@ -305,23 +305,29 @@ as_content <- function(x, error_call = caller_env(), error_arg = "...") {
 
 `as_content()` creates a new S7 `ContentText` object, with `text` as its only property.
 
-Echo
-
 ```{r}
 echo <- check_echo(echo %||% private$echo)
 ```
 
 If `echo` is `NULL`, this line sets echo to `private$echo`, which is `output`.
 
-NOTE: `rlang::%||%` is the "null-default" operator. It returns the left-hand side if it’s not `NULL`, otherwise it returns the right-hand side.
+
+::: {.callout-note}
+`rlang::%||%` is the "null-default" operator. It returns the left-hand side if it’s not `NULL`, otherwise it returns the right-hand side.
+:::
+
 
 ## Chat Implementation
 
 The remainder of the blog post focuses on the functions that power the `$chat()` method. Since the functions can lead us down rabbit holes, I've organized the key ones into this diagram:
 
-![](img/diagram.png)
+<br>
 
-We first start with `chat_impl`, which is a `generator_method`, similar to a `coro::generator`. Generators create iterator functions, which are functions you can call to return a new value. You can learn more about generators in the [coro documentation](https://coro.r-lib.org/articles/generator.html#generators).
+![Key functions for ellmer's chat implementation](img/diagram.png)
+
+<br>
+
+We first start with `chat_impl`, which is a `generator_method`, similar to a `coro::generator`. Generators create iterator functions, which are functions you can call to return a new value. You can learn more about generators in the [coro documentation](https://coro.r-lib.org/articles/generator.html#generators){target="_blank"}.
 
 ```{r}
 # If stream = TRUE, yields completion deltas. If stream = FALSE, yields
@@ -336,7 +342,7 @@ chat_impl = generator_method(function(
     ) 
 ```
 
-Within `chat_impl` is another method, `$submit_turns()`, which contains `chat_perform()`.
+Within `chat_impl` is another method, `$submit_turns()`, which contains `chat_perform()`:
 
 ```{r}
 response <- chat_perform(
@@ -409,7 +415,8 @@ method(base_request, ProviderGoogleGemini) <- function(provider) {
 }
 ```
 
-`base_request()` 
+`base_request()`: 
+
 1. Creates a new HTTP request with provider's base url 
 2. Adds headers with credentials (with `req_headers()`) 
 3. Caps the maximum number of attempts (max_tries) to 2 
@@ -417,7 +424,7 @@ method(base_request, ProviderGoogleGemini) <- function(provider) {
 6. Set user-agent for request (`r-ellmer/0.3.0.900`) 
 7. Control handling of HTTP errors by returning a character vector of the error message.
 
-After base_request() is run, the `req` object is as follows:
+After `base_request()` is run, the `req` object is as follows:
 
 ``` r
 <httr2_request>
@@ -461,7 +468,7 @@ Appends `paste0(provider@model, ":", "generateContent")` and `?alt=sse` to the r
 
 The `?alt=sse` query parameter specifies the response should be returned using Server-Sent Events (SSE), allowing data to be streamed incrementally as it is generated, rather than waiting for the full response.
 
-Together, these functions reconstruct the URL found in the Example Request from the [Google AI Documentation](https://ai.google.dev/api/generate-content?authuser=1#example-request_1).
+Together, these functions reconstruct the URL found in the Example Request from the [Google AI Documentation](https://ai.google.dev/api/generate-content?authuser=1#example-request_1){target="_blank"}.
 
 With the request URL completely constructed, we move on to constructing the body of the request with `chat_body()`, another S7 generic. The method shown below is its implementation for the `ProviderGoogleGemini` class.
 
@@ -514,7 +521,7 @@ method(chat_body, ProviderGoogleGemini) <- function(
 
 ```
 
-Converts R objects into the JSON format expected by Google’s Gemini API for chat conversations, as described in the [Google AI documentation](https://ai.google.dev/api/generate-content?authuser=1#request-body_1) under "Request body."
+Converts R objects into the JSON format expected by Google’s Gemini API for chat conversations, as described in the [Google AI documentation](https://ai.google.dev/api/generate-content?authuser=1#request-body_1){target="_blank"} under "Request body."
 
 1.  If a system prompt is provided, assign its text to the `system` object; otherwise, assign an empty string.
 2.  Define configuration options for model generation and outputs.
@@ -553,7 +560,7 @@ Policies:
 * error_body             : <function>
 ```
 
-Then, we run `chat_perform_stream(provider, req)` since `mode` is set to `stream`. Note that `chat_perform_stream()` is a [coro::generator](https://coro.r-lib.org/articles/generator.html#generators).
+Then, we run `chat_perform_stream(provider, req)` since `mode` is set to `stream`. Note that `chat_perform_stream()` is a [coro::generator](https://coro.r-lib.org/articles/generator.html#generators){target="_blank"}.
 
 ```{r}
 on_load(
@@ -574,17 +581,17 @@ on_load(
 )
 ```
 
-`on_load()` is an [rlang function](https://rlang.r-lib.org/reference/on_load.html) that registers expressions to be run on the user's machine each time the package is loaded in memory.
+`on_load()` is an [rlang function](https://rlang.r-lib.org/reference/on_load.html){target="_blank"} that registers expressions to be run on the user's machine each time the package is loaded in memory.
 
 1.  `req_perform_connection(req)` performs a request and return a streaming connection to the Google Gemini API. which lets you retrieve data a chunk at a time. This streaming connection allows for real-time delivery, allowing for a seamless experience of talking to a chatbot.
 2.  `on.exit(close(resp))` sets up code that runs when the function exits. Specifically, it will run `close(resp)`, which closes the connection and prevents resource leaks.
 3.  Create an infinite loop with `repeat{}` until it encounters a `break`
-4.  `chat_resp_stream()` reads a single server-sent event (https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
+4.  `chat_resp_stream()` reads a single server-sent event (https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events){target="_blank"}.
 5.  `stream_parse()` parses a JSON string and converts it into R objects.
 
 If `data` is `NULL`, then exit the loop with a `break` statement. If `data`is non-`NULL`, then send data back to caller.
 
-Response (`resp`)
+Response (`resp`):
 ``` r
 <httr2_response>
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
@@ -593,167 +600,25 @@ Content-Type: text/event-stream
 Body: Streaming connection
 ```
 
-First iteration (`data`):
-``` r
-$candidates
-$candidates[[1]]
-$candidates[[1]]$content
-$candidates[[1]]$content$parts
-$candidates[[1]]$content$parts[[1]]
-$candidates[[1]]$content$parts[[1]]$text
-[1] "The R programming language was created by **Ross Ihaka** and **Robert Gentleman**.\n\nThey started the project in **1992** at the"
+First iteration:
+
+> The R programming language was created by **Ross Ihaka** and **Robert Gentleman**.\n\nThey started the project in **1992** at the
+
+
+Second iteration:
+
+> University of Auckland, New Zealand. R was designed as an open-source implementation of the S programming language, with a focus on statistical computing and graphics.\n\n While they were the original creators, its development is now sustained by the **R**
 
 
 
-$candidates[[1]]$content$role
-[1] "model"
+Third iteration:
+
+> **Core Team**, an international group of volunteer developers.
 
 
-$candidates[[1]]$index
-[1] 0
+Full text of response:
+
+> The R programming language was created by **Ross Ihaka** and **Robert Gentleman**.\n\n They started the project in **1992** at the University of Auckland, New Zealand. R was designed as an open-source implementation of the S programming language, with a focus on statistical computing and graphics.\n\n While they were the original creators, its development is now sustained by the **R Core Team**, an international group of volunteer developers
 
 
-
-$usageMetadata
-$usageMetadata$promptTokenCount
-[1] 8
-
-$usageMetadata$candidatesTokenCount
-[1] 31
-
-$usageMetadata$totalTokenCount
-[1] 317
-
-$usageMetadata$promptTokensDetails
-$usageMetadata$promptTokensDetails[[1]]
-$usageMetadata$promptTokensDetails[[1]]$modality
-[1] "TEXT"
-
-$usageMetadata$promptTokensDetails[[1]]$tokenCount
-[1] 8
-
-
-
-$usageMetadata$thoughtsTokenCount
-[1] 278
-
-
-$modelVersion
-[1] "gemini-2.5-flash"
-
-$responseId
-[1] "ITOMaKm8JPXcqtsPv6KagA8"
-```
-
-Second iteration (`data`):
-
-```r
-$candidates
-$candidates[[1]]
-$candidates[[1]]$content
-$candidates[[1]]$content$parts
-$candidates[[1]]$content$parts[[1]]
-$candidates[[1]]$content$parts[[1]]$text
-[1] " University of Auckland, New Zealand. R was designed as an open-source implementation of the S programming language, with a focus on statistical computing and graphics.\n\nWhile they were the original creators, its development is now sustained by the **R"
-
-
-
-$candidates[[1]]$content$role
-[1] "model"
-
-
-$candidates[[1]]$index
-[1] 0
-
-
-
-$usageMetadata
-$usageMetadata$promptTokenCount
-[1] 8
-
-$usageMetadata$candidatesTokenCount
-[1] 79
-
-$usageMetadata$totalTokenCount
-[1] 365
-
-$usageMetadata$promptTokensDetails
-$usageMetadata$promptTokensDetails[[1]]
-$usageMetadata$promptTokensDetails[[1]]$modality
-[1] "TEXT"
-
-$usageMetadata$promptTokensDetails[[1]]$tokenCount
-[1] 8
-
-
-
-$usageMetadata$thoughtsTokenCount
-[1] 278
-
-
-$modelVersion
-[1] "gemini-2.5-flash"
-
-$responseId
-[1] "ITOMaKm8JPXcqtsPv6KagA8"
-```
-
-
-
-3rd iteration (`data`):
-
-```r
-$candidates
-$candidates[[1]]
-$candidates[[1]]$content
-$candidates[[1]]$content$parts
-$candidates[[1]]$content$parts[[1]]
-$candidates[[1]]$content$parts[[1]]$text
-[1] " Core Team**, an international group of volunteer developers."
-
-
-
-$candidates[[1]]$content$role
-[1] "model"
-
-
-$candidates[[1]]$finishReason
-[1] "STOP"
-
-$candidates[[1]]$index
-[1] 0
-
-
-
-$usageMetadata
-$usageMetadata$promptTokenCount
-[1] 8
-
-$usageMetadata$candidatesTokenCount
-[1] 89
-
-$usageMetadata$totalTokenCount
-[1] 375
-
-$usageMetadata$promptTokensDetails
-$usageMetadata$promptTokensDetails[[1]]
-$usageMetadata$promptTokensDetails[[1]]$modality
-[1] "TEXT"
-
-$usageMetadata$promptTokensDetails[[1]]$tokenCount
-[1] 8
-
-
-
-$usageMetadata$thoughtsTokenCount
-[1] 278
-
-
-$modelVersion
-[1] "gemini-2.5-flash"
-
-$responseId
-[1] "ITOMaKm8JPXcqtsPv6KagA8"
-```
-
-The text of the complete answer is: `"The R programming language was created by **Ross Ihaka** and **Robert Gentleman**.\n\nThey started the project in **1992** at the University of Auckland, New Zealand. R was designed as an open-source implementation of the S programming language, with a focus on statistical computing and graphics.\n\nWhile they were the original creators, its development is now sustained by the **R Core Team**, an international group of volunteer developers.`
+## Conclusion
