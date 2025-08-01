@@ -5,9 +5,6 @@ about:
   template: trestles
   image-shape: rectangle
   links:
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com/howard_baik
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/howard-baik/
@@ -16,7 +13,7 @@ about:
       href: https://github.com/howardbaik
 ---
 
-Howard Baik (he/him) is a Data Scientist at the Yale School of Public Health.
+Howard Baik (he/him) is a Data/Solution Engineer at Integral Consulting Inc.
 
 ## Education
 
@@ -28,7 +25,9 @@ University of Washington \| Seattle, WA Bachelor of Science in Statistics (Minor
 
 ## Experience
 
-Yale School of Public Health \| Data Scientist \| September, 2024 - Present
+Integral Consulting Inc. \| Project Data/Solution Engineer \| March, 2025 - Present
+
+Yale School of Public Health \| Data Scientist \| September, 2024 - February, 2025
 
 Fred Hutch Data Science Lab \| Software Development Engineer \| March, 2023 - August, 2024
 
