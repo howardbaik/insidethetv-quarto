@@ -2,7 +2,7 @@
 title: "Deep Dive into ellmer: Part 2"
 description: "I parsed through the source code of ellmer so you don't have to"
 author: "Howard Baik"
-date: "2025-08-21"
+date: "2025-09-12"
 categories: [ellmer]
 image: "thumbnail.png"
 execute:
@@ -19,14 +19,77 @@ Note that the ellmer R package is currently at version `0.3.0`, indicating it is
 
 ```{r}
 library(ellmer)
-
-chat <- chat_google_gemini()
-chat$chat("Who created the R programming language?")
 ```
 
-Part 2 takes a deep dive into tool calling. Provide LLM with tools it can call (tool is a function).
+Part 2 takes a deep dive into tool calling. Tool calling: Provide LLM with tools it can call (tool is synonymous with function). Joe Cheng's example: think of a brain in a jar. It does not have any ability other than the questions you ask it. 
+
+How tool calling works:
+
+![Correct diagram of tool calling](img/tool-calling.svg)
+
+### Notes from "Demystifying LLMs with Ellmer" (Joe Cheng)
+
+Ellmer asks OpenAI a question, "What's the weather right now at Fenway Park?". Attached to a tool. A tool is a name of a function, a description of what it does, a list of arguments, and the argument types. The OpenAI model responds with "call get_current_weather() to the client, ellmer". Ellmer is responsible for calling `get_current_weather()`.
+
+What is the benefit the OpenAI model providing if we are the ones doing the work at the end of the day? OpenAI is deciding when it is appropriate to call the tool, what arguments to pass to the tool, and how to interpret the results. 
 
 
+
+
+```r
+I'll help you get the weather information for Seattle. To use the weather function, I need the latitude and longitude coordinates 
+for Seattle.
+
+Seattle's coordinates are approximately:
+- Latitude: 47.6062
+- Longitude: -122.3321
+
+Let me fetch the current weather information for you.
+◯ [tool call] get_weather(latitude = 47.6062, longitude = -122.3321)
+● #> {"latitude":47.595562,"longitude":-122.32443,"generationtime_ms":0.048995018005371094,"utc_offset_seconds":0,"timezone":"G…
+Based on the weather data for Seattle, here's the current weather information in imperial units:
+
+**Current Weather in Seattle:**
+- **Temperature:** 70.3°F (21.3°C)
+- **Wind Speed:** 1.6 mph (2.5 km/h)
+- **Humidity:** 52%
+- **Time:** 1:45 AM GMT
+
+The weather in Seattle is quite pleasant with mild temperatures and light winds. The humidity is at a comfortable level of 52%.
+```
+
+
+Output of `client`:
+```r
+<Chat Anthropic/claude-sonnet-4-20250514 turns=5 tokens=1237/257 $0.01>
+── system [0] ------------------------------ 
+You are a helpful assistant that can check the weather. Report results in imperial units.
+── user [466] ------------------------------ 
+What is the weather in Seattle?
+── assistant [143] ------------------------------
+I'll help you get the weather information for Seattle. To use the weather function, I need the latitude and longitude coordinates for Seattle.
+
+Seattle's coordinates are approximately:
+- Latitude: 47.6062
+- Longitude: -122.3321
+
+Let me fetch the current weather information for you.
+[tool request (toolu_01AhcDmFFHkTvpCzDw7JLZXX)]: get_weather(latitude = 47.6062, longitude = -122.3321)
+── user [162] ------------------------------
+[tool result  (toolu_01AhcDmFFHkTvpCzDw7JLZXX)]: {"latitude":47.595562,"longitude":-122.32443,"generationtime_ms":0.048995018005371094,"utc_offset_seconds":0,"timezone":"GMT","timezone_abbreviation":"GMT","elevation":59.0,"current_units":{"time":"iso8601","interval":"seconds","temperature_2m":"°C","wind_speed_10m":"km/h","relative_humidity_2m":"%"},"current":{"time":"2025-08-19T01:45","interval":900,"temperature_2m":21.3,"wind_speed_10m":2.5,"relative_humidity_2m":52}}
+── assistant [114] ------------------------------
+Based on the weather data for Seattle, here's the current weather information in imperial units:
+
+**Current Weather in Seattle:**
+- **Temperature:** 70.3°F (21.3°C)
+- **Wind Speed:** 1.6 mph (2.5 km/h)
+- **Humidity:** 52%
+- **Time:** 1:45 AM GMT
+
+The weather in Seattle is quite pleasant with mild temperatures and light winds. The humidity is at a comfortable level of 52%.
+```
+
+User asks assistant a question with metadata for available tools -> Assistant asks user to invoke a tool, passing the desired arguments -> User invokes tool, returns output to the assistant -> Assistant incorporates tool's output as additional context for formulating a response. 
 
 
 ## Setup
