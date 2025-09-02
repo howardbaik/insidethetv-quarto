@@ -29,11 +29,13 @@ How tool calling works:
 
 ### Notes from "Demystifying LLMs with Ellmer" (Joe Cheng)
 
-Ellmer asks OpenAI a question, "What's the weather right now at Fenway Park?". Attached to a tool. A tool is a name of a function, a description of what it does, a list of arguments, and the argument types. The OpenAI model responds with "call get_current_weather() to the client, ellmer". Ellmer is responsible for calling `get_current_weather()`.
+Ellmer asks OpenAI a question, "What is the weather in Seattle?". Attached a tool. A tool is a name of a function, a description of what it does, a list of arguments, and the argument types. The OpenAI model responds with "call `get_current_weather()` to the client, ellmer". And Ellmer is responsible for calling `get_current_weather()`.
 
-What is the benefit the OpenAI model providing if we are the ones doing the work at the end of the day? OpenAI is deciding when it is appropriate to call the tool, what arguments to pass to the tool, and how to interpret the results. 
-
-
+What is the benefit the OpenAI model providing if we are the ones doing the work at the end of the day?
+OpenAI is deciding 
+- when it is appropriate to call the tool
+- what arguments to pass to the tool
+- how to interpret the results. 
 
 
 ```r
@@ -92,523 +94,205 @@ The weather in Seattle is quite pleasant with mild temperatures and light winds.
 User asks assistant a question with metadata for available tools -> Assistant asks user to invoke a tool, passing the desired arguments -> User invokes tool, returns output to the assistant -> Assistant incorporates tool's output as additional context for formulating a response. 
 
 
-## Setup
+## Helper function for `tool()`
 
-Let's look at `chat_google_gemini()`, starting with its arguments:
+`create_tool_def()` is a helper function for crafting the right call to `tool()`. It extracts the function documentation and uses an LLM to generate the right `tool()` call. Let's dive into the source code.
 
 ```{r}
+topic = rnorm
+chat = NULL
+model = deprecated()
+echo = interactive()
+verbose = FALSE
+```
+
+Setup arguments. We want to generate the `tool()` call for the `rnorm()` function, for generating random numbers according to the normal distribution. This is our `topic`. Then, we 
+
+
+```{r}
+expr <- enexpr(topic)
+```
+
+makes the `topic` argument an expression, which in R is an "object t captures the structure of the code without evaluating it (i.e. running it). " (https://adv-r.hadley.nz/expressions.html#introduction-17). 
+
+The following function checks that the only one of the arguments `model` and `chat` is supplied. 
+
+```{r}
+check_exclusive(model, chat, .require = FALSE)
+```
+
+The reason is that `model` argument has been deprecated, instead user needs to use the `chat` argument instead. 
+
+```{r}
+if (is.null(chat)) {
+  chat <- chat_openai()
+} else if (is_chat(chat)) {
+  chat <- chat$clone()
+} else {
+  stop_input_type(chat, "a <Chat> object", allow_null = TRUE)
+}
+```
+
+If `chat` is `NULL`, we assign `chat`to `chat_openai()`. If  `chat` is a `Chat` object, then we clone it (create a copy of the object that behaves identically) and assign the clone to `chat`. 
+
+
+```{r}
+tool_prompt <- read_file(system.file("tool_prompt.md", package = "ellmer"))
+chat$set_system_prompt(tool_prompt)
+```
+
+Read in the tool prompt, in markdown, and set as a system prompt (used to provide additional instructions to the LLM and shape its responses to your needs) Source: https://ellmer.tidyverse.org/articles/ellmer.html#what-is-a-prompt
+
+All in all, `create_tool_def()` provides a system prompt instructing the LLM to take a function documentation and turn it into a `tool()` call definition. 
+
+
+## Define a tool function
+
+Here is an example of OpenAI's GPT-4 generating a tool call definition for `rnorm()`:
+
+```{r}
+tool(
+  stats::rnorm,
+  name = "rnorm",
+  description = "Generate random deviates from the normal distribution with specified mean and standard 
+deviation.",
+  arguments = list(
+    n = type_integer(
+      "Number of random observations to generate. If 'length(n) > 1', the length is taken to be the
+number required."
+    ),
+    mean = type_number(
+      "Mean of the normal distribution. Defaults to 0.",
+      required = FALSE
+    ),
+    sd = type_number(
+      "Standard deviation of the normal distribution. Defaults to 1.",
+      required = FALSE
+    )
+  )
+)
+```
+
+`tool()` is a function that defines a tool and returns an S7 `ToolDef` object.
+
+```{r}
+ToolDef(
+  fun,
+  name = name,
+  description = description,
+  arguments = TypeObject(properties = arguments),
+  convert = convert,
+  annotations = annotations
+)
+```
+
+
+`$register_tool()` gives our chat object access to the tool.
+
+```{r}
+register_tool = function(tool) {
+  check_tool(tool)
+  if (has_name(private$tools, tool@name)) {
+    cli::cli_inform("Replacing existing {tool@name} tool.")
+  }
+
+  private$tools[[tool@name]] <- tool
+  invisible(self)
+}
+```
+
+Adds above `TurnDef` S7 object to `private$tools`, a list.
+
+
+
+
+
+## Walkthrough of Tool-Calling
+
+From Tool-Calling Vignette: https://ellmer.tidyverse.org/articles/tool-calling.html
+
+Initialize `chat` object: `chat <- chat_openai()`
+```{r}
+# Arguments to chat_openai()
 system_prompt = NULL
-base_url = "https://generativelanguage.googleapis.com/v1beta/"
-api_key = NULL
+base_url = Sys.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+api_key = openai_key()
 model = NULL
 params = NULL
 api_args = list()
 api_headers = character()
-echo = NULL
-```
+echo = "output"
 
-Arguments:
-
--   `system_prompt`: A system prompt to set the behavior of the assistant.
-
--   `base_url`: The base URL to the endpoint
-
--   `api_key`: Gemini API Key
-
--   `model`: LLM model (Defaults to `gemini-2.5-flash`)
-
--   `params` : Common model parameters, usually created by `params()`.
-
--   `api_args`: Named list of arbitrary extra arguments appended to the body of every chat API call. Combined with the body object generated by ellmer with `modifyList()`.
-
--   `api_headers`: Named character vector of arbitrary extra headers appended to every chat API call.
-
--   `echo`: One of the following options:
-
-    -   `none`: don't emit any output (default when running in a function).
-    -   `output`: echo text and tool-calling output as it streams in (default when running at the console).
-    -   `all`: echo all input and output.
-
-## Util functions
-
-The following functions create the `model`, `echo`, and `credentials` objects:
-
-1.  `set_default()`.
-2.  `check_echo()`.
-3.  `default_google_credentials()`.
-
-### Choose Model
-
-```{r}
-model <- set_default(model, "gemini-2.5-flash")
-
-# Definition of set_default()
-set_default <- function(value, default, arg = caller_arg(value)) {
-  if (is.null(value)) {
-    if (!is_testing() || is_snapshot()) {
-      cli::cli_inform("Using {.field {arg}} = {.val {default}}.")
-    }
-    default
-  } else {
-    value
-  }
-}
-```
-
--   If the `model` argument is `NULL`, it defaults to `gemini-2.5-flash`(the default as of this writing) and an informative message is displayed : Using model = "gemini-2.5-flash".
--   If `model` value is provided, that value is used.
-
-::: callout-note
-This function uses `rlang::caller_arg()` to capture the name of a function argument (in this case, `model`) as a string. `rlang::caller_arg()` is designed for better error reporting.
-:::
-
-### Configure Echo
-
-```{r}
+# Code inside chat_openai()
+model <- set_default(model, "gpt-4.1")
 echo <- check_echo(echo)
+params <- params %||% params()
 
-# Definition of check_echo()
-check_echo <- function(echo = NULL) {
-  if (identical(echo, "text")) {
-    lifecycle::deprecate_soft(
-      when = "0.2.0",
-      what = I('`echo = "text"`'),
-      with = I('`echo = "output"`')
-    )
-    echo <- "output"
-  }
-
-  if (is.null(echo) || identical(echo, c("none", "output", "all"))) {
-    option <- getOption("ellmer_echo")
-
-    if (!is.null(option)) {
-      option
-    } else if (env_is_user_facing(parent.frame(2))) {
-      "output"
-    } else {
-      "none"
-    }
-  } else if (isTRUE(echo)) {
-    "output"
-  } else if (isFALSE(echo)) {
-    "none"
-  } else {
-    arg_match(echo, c("none", "output", "all"))
-  }
-}
-```
-
--   If `echo` is `NULL` and code is currently executing in a user-facing environment, `check_echo()` sets the `echo` object to `output`.
--   If the `echo` argument is set to `TRUE`, then the `echo` object is set to `output`.
--   If the `echo` argument is set to `FALSE`, then the `echo` object is set to `none`.
-
-::: callout-note
-`rlang::env_is_user_facing(parent.frame(2))` checks whether the code is currently executing in a user-facing environment.
-:::
-
-### Set Google Credentials
-
-```{r}
-credentials <- default_google_credentials(api_key, gemini = TRUE)
-```
-
-`default_google_credentials()` grabs the `api_key` from an .Renviron file. Then, it sets the `credentials` object to `function() {list("x-goog-api-key" = api_key)}`.
-
-## ProviderGoogleGemini
-
-```{r}
-provider <- ProviderGoogleGemini(
-  name = "Google/Gemini",
+provider <- ProviderOpenAI(
+  name = "OpenAI",
   base_url = base_url,
   model = model,
-  params = params %||% params(),
+  params = params,
   extra_args = api_args,
-  api_key = api_key,
-  credentials = credentials
+  extra_headers = api_headers,
+  api_key = api_key
+)
+
+chat <- Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
+
+# Needed for later calls
+private <- list()
+private$provider <- provider
+```
+
+Function to get current time
+```{r}
+#' Gets the current time in the given time zone.
+#'
+#' @param tz The time zone to get the current time in.
+#' @return The current time in the given time zone.
+get_current_time <- function(tz = "UTC") {
+  format(Sys.time(), tz = tz, usetz = TRUE)
+}
+```
+
+Turn the above function into a tool 
+```{r}
+get_current_time <- tool(
+  get_current_time,
+  name = "get_current_time",
+  description = "Returns the current time.",
+  arguments = list(
+    tz = type_string(
+      "Time zone to display the current time in. Defaults to `\"UTC\"`.",
+      required = FALSE
+    )
+  )
 )
 ```
 
-`ProviderGoogleGemini` is an [S7 class](https://github.com/RConsortium/S7){target="_blank"} whose parent class is `Provider` and has the following properties:
 
-From the `Provider` S7 class:
-
--   `name`: Name of the provider.
--   `model`: Name of the model.
--   `base_url`: The base URL for the API.
--   `params`: A list of standard parameters created by `params()`.
--   `extra_args`: Arbitrary extra arguments to be included in the request body.
--   `extra_headers`: Arbitrary extra headers to be added to the request.
-
-From the `ProviderGoogleGemini` S7 class:
-
--   `api_key`: API key for Google Gemini
--   `credentials`: `class_function | NULL`, meaning either a function class or `NULL`.
--   `model`: Name of model
-
-## Chat R6 class
-
+Give our `chat` object access to our tool
 ```{r}
-Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
+# chat$register_tool(get_current_time)
+private$tools[[get_current_time@name]] <- get_current_time
 ```
 
-`Chat` is an [R6 class](https://r6.r-lib.org/articles/Introduction.html) initialized with private members:
-
+Run a query with the `$chat()` method and our user prompt `"How long ago did Neil Armstrong touch down on the moon?"`
 ```{r}
-private$provider <- provider
-private$echo <- echo
-private$callback_on_tool_request <- CallbackManager$new(args = "request")
-private$callback_on_tool_result <- CallbackManager$new(args = "result")
-self$set_system_prompt(system_prompt)
-```
+user_prompt <- "How long ago did Neil Armstrong touch down on the moon?"
 
-Since tool-calling is not the focus of this blog post, we'll set the callback aside and focus on `provider`, `echo`, and `$set_system_prompt(system_prompt)`.
-
--   `provider` refers to the S7 class initialized earlier.
--   `echo` is assigned the value of `output`.
--   `$set_system_prompt()` removes any existing system prompt and adds a new system prompt (if `system_prompt` is not `NULL`).
-
-## `$chat()` method
-
-Once the Chat R6 class is initiated with `chat <- chat_google_gemini()`, we run the `$chat() method`, which accepts an user prompt. Inside `user_turn(...)`, the `user_prompt` is provided. In this blog post, the user prompt will be `"Who created the R programming language?"`.
-
-::: callout-tip
-R was created by Ross Ihaka and Robert Gentleman at the University of Auckland in New Zealand.
-:::
-
-```{r}
-chat = function(..., echo = NULL) {
-  turn <- user_turn(...)
-  echo <- check_echo(echo %||% private$echo)
-  
-  # Returns a single turn (the final response from the assistant), even if
-  # multiple rounds of back and forth happened.
-  coro::collect(private$chat_impl(
-    turn,
-    stream = echo != "none",
-    echo = echo
-  ))
-  
-  text <- self$last_turn()@text
-  if (echo == "none") text else invisible(text)
-}
-```
-
-First, lets dig into the `user_turn()` function:
-
-```{r}
-# Definition of user_turn()
-user_turn <- function(..., .call = caller_env()) {
-  as_user_turn(list2(...), call = .call, arg = "...")
-}
-
-# Definition of as_user_turn()
-as_user_turn <- function(contents, call = caller_env(), arg = "...") {
-  if (length(contents) == 0) {
-    cli::cli_abort("{.arg {arg}} must contain at least one input.", call = call)
-  }
-  if (is_named(contents)) {
-    cli::cli_abort("{.arg {arg}} must be unnamed.", call = call)
-  }
-  if (S7_inherits(contents, Content)) {
-    return(Turn("user", list(contents)))
-  }
-  
-  contents <- lapply(contents, as_content, error_call = call, error_arg = arg)
-  Turn("user", contents)
-}
-```
-
-`as_user_turn()`:
-
-1.  Checks whether length of `contents` is 0. If so, signal an error.
-2.  Checks whether `contents` is named (whether contents has a names attribute). If so, signal an error.
-3.  Applies `as_content()` over `contents` (more on this below).
-4.  Creates a `Turn` S7 object from `contents`. A `Turn` object contains a list of `Content`s representing the individual messages (text, images, tools) within the turn.
-
-`as_content()`:
-
-```{r}
-as_content <- function(x, error_call = caller_env(), error_arg = "...") {
-  if (is.null(x)) {
-    list()
-  } else if (is_prompt(x)) {
-    if (length(x) == 1) {
-      ContentText(x[[1]])
-    } else {
-      cli::cli_abort(
-        "{.arg {error_arg}} can only accept a single prompt.",
-        call = error_call
-      )
-    }
-  } else if (is.character(x)) {
-    ContentText(paste0(x, collapse = "\n\n"))
-  } else if (S7_inherits(x, Content)) {
-    x
-  } else {
-    stop_input_type(
-      x,
-      what = "made up strings or <content> objects",
-      arg = error_arg,
-      error_call = error_call
-    )
-  }
-}
-```
-
--   If `x` is `NULL`, return an empty list.
--   If `x` inherits from the `ellmer_prompt` class, create a `ContentText` object.
--   If `x` is a character, create a `ContentText` object.
--   If `x` inherits from Content S7 class, return `x`
-
-`as_content()` creates a new S7 `ContentText` object, with `text` as its only property.
-
-We move on to the second line of the `$chat() method`:
-
-```{r}
+turn <- user_turn(user_prompt)
 echo <- check_echo(echo %||% private$echo)
 ```
 
-If `echo` is `NULL`, this line sets echo to `private$echo`, which is `output`.
+Chat implementation method `$chat_impl()` leads to `$submit_turns()`, which then leads to `chat_perform()`.
 
-::: callout-note
-`rlang::%||%` is the "null-default" operator. It returns the left-hand side if it’s not `NULL`, otherwise it returns the right-hand side.
-:::
-
-## Chat Implementation
-
-The remainder of the blog post focuses on the functions that power the `$chat()` method. Since the functions can lead us down rabbit holes, I've organized the key ones into this diagram:
-
-![Key functions for ellmer's chat implementation](img/diagram.png)
-
-<br>
-
-We first start with `chat_impl`, which is a `generator_method`, similar to a `coro::generator`. Generators create iterator functions, which are functions you can call to return a new value. You can learn more about generators in the [coro documentation](https://coro.r-lib.org/articles/generator.html#generators){target="_blank"}.
-
+`chat_perform()` results in a generator instance called `response` (created by calling a generator function):
 ```{r}
-chat_impl = generator_method(function(
-      self,
-      private,
-      user_turn,
-      stream,
-      echo,
-      yield_as_content = FALSE
-    ) 
-```
-
-Inside `chat_impl`, the `$submit_turns()` method leads to `chat_perform()`:
-
-```{r}
-response <- chat_perform(
-  provider = private$provider
-  mode = if (stream) "stream" else "value",
-  turns = c(private$.turns, list(user_turn)),
-  tools = if (is.null(type)) private$tools,
-  type = type 
-)
-```
-
-`chat_perform()` leads to `chat_request()`, an S7 generic, and the method shown below is its implementation for the `ProviderGoogleGemini` class.
-
-```{r}
-method(chat_request, ProviderGoogleGemini) <- function(
-  provider,
-  stream = TRUE,
-  turns = list(),
-  tools = list(),
-  type = NULL
-) {
-  req <- base_request(provider)
-
-  # Can't use chat_path() because it varies based on stream
-  req <- req_url_path_append(req, "models")
-  if (stream) {
-    # https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
-    req <- req_url_path_append(
-      req,
-      paste0(provider@model, ":", "streamGenerateContent")
-    )
-    req <- req_url_query(req, alt = "sse")
-  } else {
-    # https://ai.google.dev/api/generate-content#method:-models.generatecontent
-    req <- req_url_path_append(
-      req,
-      paste0(provider@model, ":", "generateContent")
-    )
-  }
-
-  body <- chat_body(
-    provider = provider,
-    stream = stream,
-    turns = turns,
-    tools = tools,
-    type = type
-  )
-  body <- modify_list(body, provider@extra_args)
-
-  req <- req_body_json(req, body)
-  req <- req_headers(req, !!!provider@extra_headers)
-  req
-}
-```
-
-`base_request()` is an S7 generic, and the method shown below is its implementation for the `ProviderGoogleGemini` class.
-
-```{r}
-method(base_request, ProviderGoogleGemini) <- function(provider) {
-  req <- request(provider@base_url) 
-  req <- ellmer_req_credentials(req, provider@credentials) 
-  req <- req_retry(req, max_tries = 2)
-  req <- ellmer_req_timeout(req, stream) 
-  req <- ellmer_req_user_agent(req) # 
-  req <- req_error(req, body = function(resp) {
-    json <- resp_body_json(resp, check_type = FALSE) 
-    json$error$message
-  }) 
-  req
-}
-```
-
-`base_request()`:
-
-1.  Creates a new HTTP request with provider's base url.
-2.  Adds headers with credentials (with `req_headers()`).
-3.  Caps the maximum number of attempts (`max_tries`) to 2.
-4.  Set curl option of HTTP timeout to 5 minutes.
-5.  Set user-agent for request (`r-ellmer/0.3.0.900`).
-6.  Control handling of HTTP errors by returning a character vector of the error message.
-
-After `base_request()` is run, the `req` object is as follows:
-
-``` r
-<httr2_request>
-GET https://generativelanguage.googleapis.com/v1beta/
-Headers:
-* x-goog-api-key: <REDACTED>
-Body: empty
-Options:
-* timeout_ms    : 3e+05
-* connecttimeout: 0
-* useragent     : "r-ellmer/0.3.0.9000"
-Policies:
-* retry_max_tries        : 3
-* retry_on_failure       : TRUE
-* retry_failure_threshold: Inf
-* retry_failure_timeout  : 30
-* retry_realm            : "generativelanguage.googleapis.com"
-* error_body             : <function>
-```
-
-Note that this is a GET request, so the body is empty. The base URL is defined, and additional parameters will be appended to it.
-
-```{r}
-req <- req_url_path_append(req, "models")
-```
-
-Above line adds `/models` to the end of the path.
-
-Since `stream` is `TRUE`, we have the following:
-
-```{r}
-req <- req_url_path_append(
-  req,
-  paste0(provider@model, ":", "generateContent")
-)
-
-req <- req_url_query(req, alt = "sse")
-```
-
-Above code appends `paste0(provider@model, ":", "generateContent")` and `?alt=sse` to the request path.
-
-The `?alt=sse` query parameter specifies the response should be returned using [Server-Sent Events (SSE)](https://en.wikipedia.org/wiki/Server-sent_events){target="_blank"}, allowing data to be streamed incrementally as it is generated, rather than waiting for the full response.
-
-Together, these functions reconstruct the URL found in the Example Request from the [Google AI Documentation](https://ai.google.dev/api/generate-content?authuser=1#example-request_1){target="_blank"}.
-
-With the request URL completely constructed, we move on to constructing the body of the request with `chat_body()`, another S7 generic. The method shown below is its implementation for the `ProviderGoogleGemini` class.
-
-```{r}
-method(chat_body, ProviderGoogleGemini) <- function(
-    provider,
-    stream = TRUE,
-    turns = list(),
-    tools = list(),
-    type = NULL
-) {
-  if (length(turns) >= 1 && is_system_prompt(turns[[1]])) { 
-    system <- list(parts = list(text = turns[[1]]@text))  
-  } else {
-    system <- list(parts = list(text = ""))
-  }
-  
-  generation_config <- chat_params(provider, provider@params)
-  if (!is.null(type)) {
-    generation_config$response_mime_type <- "application/json"
-    generation_config$response_schema <- as_json(provider, type)
-  }
-  
-  contents <- as_json(provider, turns)
-  
-  # https://ai.google.dev/api/caching#Tool
-  if (length(tools) > 0) {
-    funs <- as_json(provider, unname(tools))
-    tools <- list(functionDeclarations = funs)
-  } else {
-    tools <- NULL
-  }
-  
-  compact(list(
-    contents = contents,
-    tools = tools,
-    systemInstruction = system,
-    generationConfig = generation_config
-  ))
-}
-
-```
-
-This converts R objects into the JSON format expected by Google’s Gemini API for chat conversations, as described in the [Google AI documentation](https://ai.google.dev/api/generate-content?authuser=1#request-body_1){target="_blank"} under "Request body."
-
-1.  If a system prompt is provided, assign its text to the `system` object; otherwise, assign an empty string.
-2.  Define configuration options for model generation and outputs.
-3.  Format `contents` as JSON.
-4.  Since tool-calling is not being used, set `tools` to `NULL`.
-
-```{r}
-body <- modify_list(body, provider@extra_args)
-
-req <- req_body_json(req, body)
-req <- req_headers(req, !!!provider@extra_headers)
-```
-
-1.  `modify_list()` modifies `body`, a list, by updating it with values from `provider@extra_args`.
-2.  Sends the `body` object in JSON encoded data.
-3.  Sets value of any headers.
-
-After `chat_request()` is run and `req` is completely constructed, we end up with the request below:
-
-``` r
-<httr2_request>
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
-Headers:
-* x-goog-api-key: <REDACTED>
-Body: JSON data
-Options:
-* timeout_ms    : 3e+05
-* connecttimeout: 0
-* useragent     : "r-ellmer/0.3.0.9000"
-Policies:
-* retry_max_tries        : 3
-* retry_on_failure       : TRUE
-* retry_failure_threshold: Inf
-* retry_failure_timeout  : 30
-* retry_realm            : "generativelanguage.googleapis.com"
-* error_body             : <function>
-```
-
-Then, we run `chat_perform_stream(provider, req)` since `mode` is set to `stream`. Note that `chat_perform_stream()` is a [coro::generator](https://coro.r-lib.org/articles/generator.html#generators){target="_blank"}.
-
-```{r}
-on_load(
-  chat_perform_stream <- coro::generator(function(provider, req) {
+> response
+<generator/instance>
+function(provider, req) {
     resp <- req_perform_connection(req)
     on.exit(close(resp))
 
@@ -621,48 +305,552 @@ on_load(
         yield(data)
       }
     }
-  })
-)
+  }
+<environment: namespace:ellmer>
 ```
 
-`on_load()` is an [rlang function](https://rlang.r-lib.org/reference/on_load.html){target="_blank"} that registers expressions to be run on the user's machine each time the package is loaded in memory.
+The generator is designed for streaming responses, so manually calling it until exhausted makes the most sense for your streaming use case.
 
-1.  `req_perform_connection(req)` performs a request and returns a streaming connection to the Google Gemini API. A streaming connection lets you retrieve data a chunk at a time. Also, it provides real-time delivery, allowing for a seamless experience of talking to a chatbot.
-2.  `on.exit(close(resp))` sets up code that runs when the function exits. Specifically, it will run `close(resp)`, which closes the connection and prevents resource leaks.
-3.  `repeat{}` creates an infinite loop with until it encounters a `break`.
-4.  `chat_resp_stream()` reads a single [server-sent event](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events){target="_blank"}.
-5.  `stream_parse()` parses a JSON string and converts it into R objects.
-
-If `data` is `NULL`, then exit the loop with a `break` statement. If `data`is non-`NULL`, then it sends data back to caller.
-
-Response (`resp`):
-
-``` r
-<httr2_response>
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
-Status: 200 OK
-Content-Type: text/event-stream
-Body: Streaming connection
+Use `coro::collect()` to get all values:
+```{r}
+all_chunks <- coro::collect(response)
 ```
 
-First iteration of the `repeat` loop:
 
-> The R programming language was created by **Ross Ihaka** and **Robert Gentleman**.\n\nThey started the project in **1992** at the
+```{r}
+> all_chunks
+[[1]]
+[[1]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
 
-Second iteration of the `repeat` loop:
+[[1]]$object
+[1] "chat.completion.chunk"
 
-> University of Auckland, New Zealand. R was designed as an open-source implementation of the S programming language, with a focus on statistical computing and graphics.\n\n While they were the original creators, its development is now sustained by the **R**
+[[1]]$created
+[1] 1756756057
 
-Third iteration of the `repeat` loop:
+[[1]]$model
+[1] "gpt-4.1-2025-04-14"
 
-> **Core Team**, an international group of volunteer developers.
+[[1]]$service_tier
+[1] "default"
 
-Full text of response:
+[[1]]$system_fingerprint
+[1] "fp_daf5fcc80a"
 
-> The R programming language was created by **Ross Ihaka** and **Robert Gentleman**.\n\n They started the project in **1992** at the University of Auckland, New Zealand. R was designed as an open-source implementation of the S programming language, with a focus on statistical computing and graphics.\n\n While they were the original creators, its development is now sustained by the **R Core Team**, an international group of volunteer developers.
+[[1]]$choices
+[[1]]$choices[[1]]
+[[1]]$choices[[1]]$index
+[1] 0
 
-## Conclusion
+[[1]]$choices[[1]]$delta
+[[1]]$choices[[1]]$delta$role
+[1] "assistant"
 
-In this blog post, we took a closer look at how the `Chat` object and its `$chat()` method work under the hood. The ellmer package's core functionality involves sending a structured API request and establishing a streaming connection to the API using the httr2 package. The package also supports other features like tool-calling and accepts various forms of user input, such as images and videos. More on these in the upcoming posts as part of this blog series on ellmer.
+[[1]]$choices[[1]]$delta$content
+NULL
 
-Thanks for reading.
+[[1]]$choices[[1]]$delta$tool_calls
+[[1]]$choices[[1]]$delta$tool_calls[[1]]
+[[1]]$choices[[1]]$delta$tool_calls[[1]]$index
+[1] 0
+
+[[1]]$choices[[1]]$delta$tool_calls[[1]]$id
+[1] "call_Ey42w3gZblkSeZtlGFxRPjhl"
+
+[[1]]$choices[[1]]$delta$tool_calls[[1]]$type
+[1] "function"
+
+[[1]]$choices[[1]]$delta$tool_calls[[1]]$`function`
+[[1]]$choices[[1]]$delta$tool_calls[[1]]$`function`$name
+[1] "get_current_time"
+
+[[1]]$choices[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] ""
+
+
+
+
+[[1]]$choices[[1]]$delta$refusal
+NULL
+
+
+[[1]]$choices[[1]]$logprobs
+NULL
+
+[[1]]$choices[[1]]$finish_reason
+NULL
+
+
+
+[[1]]$usage
+NULL
+
+[[1]]$obfuscation
+[1] "oxf"
+
+
+[[2]]
+[[2]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[2]]$object
+[1] "chat.completion.chunk"
+
+[[2]]$created
+[1] 1756756057
+
+[[2]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[2]]$service_tier
+[1] "default"
+
+[[2]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[2]]$choices
+[[2]]$choices[[1]]
+[[2]]$choices[[1]]$index
+[1] 0
+
+[[2]]$choices[[1]]$delta
+[[2]]$choices[[1]]$delta$tool_calls
+[[2]]$choices[[1]]$delta$tool_calls[[1]]
+[[2]]$choices[[1]]$delta$tool_calls[[1]]$index
+[1] 0
+
+[[2]]$choices[[1]]$delta$tool_calls[[1]]$`function`
+[[2]]$choices[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] "{\""
+
+
+
+
+
+[[2]]$choices[[1]]$logprobs
+NULL
+
+[[2]]$choices[[1]]$finish_reason
+NULL
+
+
+
+[[2]]$usage
+NULL
+
+[[2]]$obfuscation
+[1] "oY"
+
+
+[[3]]
+[[3]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[3]]$object
+[1] "chat.completion.chunk"
+
+[[3]]$created
+[1] 1756756057
+
+[[3]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[3]]$service_tier
+[1] "default"
+
+[[3]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[3]]$choices
+[[3]]$choices[[1]]
+[[3]]$choices[[1]]$index
+[1] 0
+
+[[3]]$choices[[1]]$delta
+[[3]]$choices[[1]]$delta$tool_calls
+[[3]]$choices[[1]]$delta$tool_calls[[1]]
+[[3]]$choices[[1]]$delta$tool_calls[[1]]$index
+[1] 0
+
+[[3]]$choices[[1]]$delta$tool_calls[[1]]$`function`
+[[3]]$choices[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] "tz"
+
+
+
+
+
+[[3]]$choices[[1]]$logprobs
+NULL
+
+[[3]]$choices[[1]]$finish_reason
+NULL
+
+
+
+[[3]]$usage
+NULL
+
+[[3]]$obfuscation
+[1] "mtZ"
+
+
+[[4]]
+[[4]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[4]]$object
+[1] "chat.completion.chunk"
+
+[[4]]$created
+[1] 1756756057
+
+[[4]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[4]]$service_tier
+[1] "default"
+
+[[4]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[4]]$choices
+[[4]]$choices[[1]]
+[[4]]$choices[[1]]$index
+[1] 0
+
+[[4]]$choices[[1]]$delta
+[[4]]$choices[[1]]$delta$tool_calls
+[[4]]$choices[[1]]$delta$tool_calls[[1]]
+[[4]]$choices[[1]]$delta$tool_calls[[1]]$index
+[1] 0
+
+[[4]]$choices[[1]]$delta$tool_calls[[1]]$`function`
+[[4]]$choices[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] "\":\""
+
+
+
+
+
+[[4]]$choices[[1]]$logprobs
+NULL
+
+[[4]]$choices[[1]]$finish_reason
+NULL
+
+
+
+[[4]]$usage
+NULL
+
+[[4]]$obfuscation
+[1] ""
+
+
+[[5]]
+[[5]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[5]]$object
+[1] "chat.completion.chunk"
+
+[[5]]$created
+[1] 1756756057
+
+[[5]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[5]]$service_tier
+[1] "default"
+
+[[5]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[5]]$choices
+[[5]]$choices[[1]]
+[[5]]$choices[[1]]$index
+[1] 0
+
+[[5]]$choices[[1]]$delta
+[[5]]$choices[[1]]$delta$tool_calls
+[[5]]$choices[[1]]$delta$tool_calls[[1]]
+[[5]]$choices[[1]]$delta$tool_calls[[1]]$index
+[1] 0
+
+[[5]]$choices[[1]]$delta$tool_calls[[1]]$`function`
+[[5]]$choices[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] "UTC"
+
+
+
+
+
+[[5]]$choices[[1]]$logprobs
+NULL
+
+[[5]]$choices[[1]]$finish_reason
+NULL
+
+
+
+[[5]]$usage
+NULL
+
+[[5]]$obfuscation
+[1] "tN"
+
+
+[[6]]
+[[6]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[6]]$object
+[1] "chat.completion.chunk"
+
+[[6]]$created
+[1] 1756756057
+
+[[6]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[6]]$service_tier
+[1] "default"
+
+[[6]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[6]]$choices
+[[6]]$choices[[1]]
+[[6]]$choices[[1]]$index
+[1] 0
+
+[[6]]$choices[[1]]$delta
+[[6]]$choices[[1]]$delta$tool_calls
+[[6]]$choices[[1]]$delta$tool_calls[[1]]
+[[6]]$choices[[1]]$delta$tool_calls[[1]]$index
+[1] 0
+
+[[6]]$choices[[1]]$delta$tool_calls[[1]]$`function`
+[[6]]$choices[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] "\"}"
+
+
+
+
+
+[[6]]$choices[[1]]$logprobs
+NULL
+
+[[6]]$choices[[1]]$finish_reason
+NULL
+
+
+
+[[6]]$usage
+NULL
+
+[[6]]$obfuscation
+[1] "hd"
+
+
+[[7]]
+[[7]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[7]]$object
+[1] "chat.completion.chunk"
+
+[[7]]$created
+[1] 1756756057
+
+[[7]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[7]]$service_tier
+[1] "default"
+
+[[7]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[7]]$choices
+[[7]]$choices[[1]]
+[[7]]$choices[[1]]$index
+[1] 0
+
+[[7]]$choices[[1]]$delta
+named list()
+
+[[7]]$choices[[1]]$logprobs
+NULL
+
+[[7]]$choices[[1]]$finish_reason
+[1] "tool_calls"
+
+
+
+[[7]]$usage
+NULL
+
+[[7]]$obfuscation
+[1] "f60"
+
+
+[[8]]
+[[8]]$id
+[1] "chatcmpl-CB4n3VbyZbyrupX1yU2jM3UQmWdPq"
+
+[[8]]$object
+[1] "chat.completion.chunk"
+
+[[8]]$created
+[1] 1756756057
+
+[[8]]$model
+[1] "gpt-4.1-2025-04-14"
+
+[[8]]$service_tier
+[1] "default"
+
+[[8]]$system_fingerprint
+[1] "fp_daf5fcc80a"
+
+[[8]]$choices
+list()
+
+[[8]]$usage
+[[8]]$usage$prompt_tokens
+[1] 107
+
+[[8]]$usage$completion_tokens
+[1] 15
+
+[[8]]$usage$total_tokens
+[1] 122
+
+[[8]]$usage$prompt_tokens_details
+[[8]]$usage$prompt_tokens_details$cached_tokens
+[1] 0
+
+[[8]]$usage$prompt_tokens_details$audio_tokens
+[1] 0
+
+
+[[8]]$usage$completion_tokens_details
+[[8]]$usage$completion_tokens_details$reasoning_tokens
+[1] 0
+
+[[8]]$usage$completion_tokens_details$audio_tokens
+[1] 0
+
+[[8]]$usage$completion_tokens_details$accepted_prediction_tokens
+[1] 0
+
+[[8]]$usage$completion_tokens_details$rejected_prediction_tokens
+[1] 0
+
+
+
+[[8]]$obfuscation
+[1] "iewwlXD41yGE"
+```
+
+The OpenAI model responded with streaming response data. This represents a streaming function call to:
+
+- Function: get_current_time
+- Arguments: {"tz":"UTC"}
+
+
+
+```{r}
+result <- NULL
+for (chunk in all_chunks) {
+  result <- stream_merge_chunks(private$provider, result, chunk)
+}
+```
+
+Output:
+
+```r
+[[1]]$delta$tool_calls[[1]]$`function`
+[[1]]$delta$tool_calls[[1]]$`function`$name
+[1] "get_current_time"
+
+[[1]]$delta$tool_calls[[1]]$`function`$arguments
+[1] "{\"tz\":\"UTC\"}"
+```
+
+
+```{r}
+turn <- value_turn(private$provider, result, has_type = !is.null(type))
+```
+
+`value_turn()` is an S7 generic, and the method shown below is its implementation for the `ProviderOpenAI` class
+
+```{r}
+method(value_turn, ProviderOpenAI) <- function(
+  provider,
+  result,
+  has_type = FALSE
+) {
+  if (has_name(result$choices[[1]], "delta")) {
+    # streaming
+    message <- result$choices[[1]]$delta
+  } else {
+    message <- result$choices[[1]]$message
+  }
+
+  if (has_type) {
+    if (is_string(message$content)) {
+      json <- jsonlite::parse_json(message$content[[1]])
+    } else {
+      json <- message$content
+    }
+    content <- list(ContentJson(json))
+  } else {
+    content <- lapply(message$content, as_content)
+  }
+  if (has_name(message, "tool_calls")) {
+    calls <- lapply(message$tool_calls, function(call) {
+      name <- call$`function`$name
+      # TODO: record parsing error
+      args <- tryCatch(
+        jsonlite::parse_json(call$`function`$arguments),
+        error = function(cnd) list()
+      )
+      ContentToolRequest(name = name, arguments = args, id = call$id)
+    })
+    content <- c(content, calls)
+  }
+
+  # > content
+  # [[1]]
+  # <ellmer::ContentToolRequest>
+  #  @ id       : chr "call_Ey42w3gZblkSeZtlGFxRPjhl"
+  #  @ name     : chr "get_current_time"
+  #  @ arguments:List of 1
+  #  .. $ tz: chr "UTC"
+  #  @ tool     : NULL
+
+  if (is.null(result$usage)) {
+    tokens <- tokens_log(provider)
+  } else {
+    cached_tokens <- result$usage$prompt_tokens_details$cached_tokens %||% 0
+    tokens <- tokens_log(
+      provider,
+      input = result$usage$prompt_tokens - cached_tokens,
+      output = result$usage$completion_tokens,
+      cached_input = cached_tokens
+    )
+    # input, output, and cached input tokens
+    # 107,   15,         0
+  }
+  assistant_turn(
+    content,
+    json = result,
+    tokens = tokens
+  )
+  # Turn object for assistant turn
+}
+```
