@@ -25,87 +25,15 @@ Part 2 takes a deep dive into tool calling. Tool calling provides LLM with tools
 
 According to the [ellmer tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html){target="_blank"}, this is how tool calling works:
 
-![Correct diagram of tool calling](img/tool-calling.svg)
+![Diagram of tool calling](img/tool-calling.svg)
 
 The user asks the assistant a question, "What is the weather right now at Fenway Park?" along with a tool (name of a function, a description of what it does, a list of arguments, and the argument types). The assistant responds with a request to call the tool. Then, the user calls the tool, returns the result to the assistant, which uses it to generate the final answer.
 
-
-## Define a tool function
-
-Here is an example of OpenAI's GPT-4 generating a tool call definition for `rnorm()`:
-
-```{r}
-tool(
-  stats::rnorm,
-  name = "rnorm",
-  description = "Generate random deviates from the normal distribution with specified mean and standard 
-deviation.",
-  arguments = list(
-    n = type_integer(
-      "Number of random observations to generate. If 'length(n) > 1', the length is taken to be the
-number required."
-    ),
-    mean = type_number(
-      "Mean of the normal distribution. Defaults to 0.",
-      required = FALSE
-    ),
-    sd = type_number(
-      "Standard deviation of the normal distribution. Defaults to 1.",
-      required = FALSE
-    )
-  )
-)
-```
-
-`tool()` is a function that defines a tool and returns an S7 `ToolDef` object.
-
-```{r}
-ToolDef(
-  fun,
-  name = name,
-  description = description,
-  arguments = TypeObject(properties = arguments),
-  convert = convert,
-  annotations = annotations
-)
-```
-
-
-`$register_tool()` gives our chat object access to the tool.
-
-```{r}
-register_tool = function(tool) {
-  check_tool(tool)
-  if (has_name(private$tools, tool@name)) {
-    cli::cli_inform("Replacing existing {tool@name} tool.")
-  }
-
-  private$tools[[tool@name]] <- tool
-  invisible(self)
-}
-```
-
-Adds above `TurnDef` S7 object to `private$tools`, a list.
-
-
-
 ## Walkthrough of Tool-Calling
 
-From Tool-Calling Vignette: https://ellmer.tidyverse.org/articles/tool-calling.html
+We will be walking through an example from the [tool-calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html).
 
-`ContentToolRequest` and `ContentToolResult` are S7 classes used for tool-calling in ellmer. 
-
-`ContentToolRequest`
-- id: Tool call id
-- name: Name of tool function
-- arguments: Arguments to call function
-- tool: Tool metadata
-
-`ContentToolResult`
-- value: The result of calling tool function
-- error: Error message when calling tool function and it throws an error
-- extra: Optional additional data
-- request: The `ContentToolRequest` associated with tool result.
+### Setup
 
 Initialize `chat` object: `chat <- chat_openai()`
 ```{r}
@@ -141,7 +69,7 @@ private <- list()
 private$provider <- provider
 ```
 
-Function to get current time
+The example defines a function to get current time, `get_current_time()`:
 ```{r}
 #' Gets the current time in the given time zone.
 #'
@@ -170,8 +98,9 @@ get_current_time <- tool(
 
 Give our `chat` object access to our tool
 ```{r}
-# chat$register_tool(get_current_time)
 private$tools[[get_current_time@name]] <- get_current_time
+# is equal to
+# chat$register_tool(get_current_time)
 ```
 
 Run a query with the `$chat()` method and our user prompt `"How long ago did Neil Armstrong touch down on the moon?"`
@@ -182,7 +111,7 @@ turn <- user_turn(user_prompt)
 echo <- check_echo(echo %||% private$echo)
 ```
 
-The chat implementation method `$chat_impl()` leads to `$submit_turns()`,
+As shown in the diagram of ellmer's chat implementation in [Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#chat-implementation), The chat implementation method `$chat_impl()` leads to `$submit_turns()`,
 which then leads to `chat_perform()`.
 
 ```{r}
@@ -201,7 +130,7 @@ response <- chat_perform(
       )
 ```
 
-`chat_perform()` results in a generator instance called `response` (created by calling a generator function):
+Calling `chat_perform()` results in a generator instance called `response` (created by calling a generator function):
 ```r
 # Output from calling chat_perform()
 > response
@@ -222,8 +151,8 @@ function(provider, req) {
   }
 <environment: namespace:ellmer>
 ```
-
-Iterating through `response` with 
+In order to unpack the iterators within a [generator](https://coro.r-lib.org/articles/generator.html#generators), we  
+[iterate manually](https://coro.r-lib.org/articles/generator.html#iterating) with 
 ```{r}
 coro::loop(for (x in response) {
   print("Iteration------------------------------------------------------")
@@ -231,18 +160,18 @@ coro::loop(for (x in response) {
 })
 ```
 
-The generator is designed for streaming responses, so manually calling it until exhausted makes the most sense for your streaming use case.
+Alternatively, we can collect all values of iterator with `coro::collect()`:
 
-Alternatively, you can collect all values of iterator with `coro::collect()` to get all values:
 ```{r}
 all_chunks <- coro::collect(response)
 ```
 
-The OpenAI model responded with streaming response data. This represents a streaming function call to:
+The OpenAI model responded with streaming response data:
 
-- Function: get_current_time
-- Arguments: {"tz":"UTC"}
+- Function: `get_current_time`
+- Arguments: `{"tz":"UTC"}`
 
+Then, we simply the response with `stream_merge_chunks()`:
 ```{r}
 result <- NULL
 for (chunk in all_chunks) {
@@ -261,22 +190,20 @@ Output related to tool call:
 [1] "{\"tz\":\"UTC\"}"
 ```
 
+Then, we create a `Turn` object for the assistant turn with `ContentToolRequest`, result, and tokens.
 
 ```{r}
 turn <- value_turn(private$provider, result, has_type = !is.null(type))
 ```
 
-`value_turn()` is an S7 generic, and the method shown below is its implementation for the `ProviderOpenAI` class
-
-Creates a Turn object for the assistant turn with `ContentToolRequest`, result, and tokens.
-
+Here, we insert our tool function (`get_current_time()`) in the `turn` object. 
 ```{r}
 turn <- match_tools(turn, private$tools)
 ```
 
-Insert our tool (`get_current_time()`) in the `turn` object.  
+ 
 
-So far, we have `user_turn` and `assistant_turn`:
+So far, we have `user_turn` and `turn` (assistant turn):
 
 ```r
 > user_turn
@@ -287,6 +214,8 @@ How long ago did Neil Armstrong touch down on the moon?
 [tool request (call_0rAWkevHlh4ZXHdfQbob3Aw8)]: get_current_time(tz = "UTC")
 ```
 
+To recap, the user asked the assistant a question, "How long ago did Neil Armstrong touch down on the moon?" and the assistant responded with a tool request, asking the user to run the tool function.
+
 We add these turns to the Chat object:
 ```{r}
 # self$add_turn(user_turn, turn)
@@ -295,7 +224,6 @@ private$.turns[[length(private$.turns) + 1]] <- turn
 ```
 
 This concludes the `private$submit_turns()` method.
-
 
 Then, we invoke the tool since the assistant turn has tool request (`turn_has_tool_request()`)
 
@@ -361,6 +289,24 @@ invoke_tools <- coro::generator(function(
   })
 
 ```
+
+
+`ContentToolRequest` and `ContentToolResult` are S7 classes used for tool-calling in ellmer. 
+
+`ContentToolRequest`
+
+- id: Tool call id
+- name: Name of tool function
+- arguments: Arguments to call function
+- tool: Tool metadata
+
+`ContentToolResult`
+
+- value: The result of calling tool function
+- error: Error message when calling tool function and it throws an error
+- extra: Optional additional data
+- request: The `ContentToolRequest` associated with tool result.
+
 
 `request` is 
 ```{r}
