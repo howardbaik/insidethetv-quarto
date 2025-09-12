@@ -507,11 +507,15 @@ $choices[[1]]$delta$content
 [1] "Neil Armstrong touched down on the moon on July 20, 1969. As of today (September 6, 2025), it has been 56 years, 1 month, and 17 days since Neil Armstrong first set foot on the lunar surface."
 ```
 
+And we insert the result and provider into `turn`, for assistant turn:
+
+
 ```{r}
 turn <- value_turn(private$provider, result, has_type = !is.null(type))
 turn <- match_tools(turn, private$tools)
 ```
 
+The assistant turn contains the response of the assistant when the user sent the tool result:
 
 ```r
 > turn
@@ -533,4 +537,6 @@ assistant_turn <- self$last_turn()
 user_turn <- NULL
 ```
 
-Since `turn_has_tool_request(assistant_turn)` is `FALSE`, that concludes `private$chat_impl()`.
+Since `turn_has_tool_request(assistant_turn)` is `FALSE`, that completes the while loop. We go to the top of the while loop, and exit out since `user_turn` is `NULL`.
+
+This concludes `private$chat_impl()`, and hence completes the `$chat()` method.
