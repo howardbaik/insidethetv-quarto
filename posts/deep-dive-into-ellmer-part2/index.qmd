@@ -171,7 +171,7 @@ The OpenAI model responded with streaming response data:
 - Function: `get_current_time`
 - Arguments: `{"tz":"UTC"}`
 
-Then, we simply the response with `stream_merge_chunks()`:
+Then, we simplify the response with `stream_merge_chunks()`:
 ```{r}
 result <- NULL
 for (chunk in all_chunks) {
@@ -287,7 +287,32 @@ invoke_tools <- coro::generator(function(
       yield(result)
     }
   })
+```
 
+
+`invoke_tool()`
+```{r}
+invoke_tool <- function(request) {
+  if (is.null(request@tool)) {
+    return(new_tool_result(request, error = "Unknown tool"))
+  }
+
+  args <- tool_request_args(request)
+  if (is_tool_result(args)) {
+    # Failed to convert the arguments
+    return(args)
+  }
+
+  tryCatch(
+    {
+      result <- do.call(request@tool, args)
+      new_tool_result(request, result)
+    },
+    error = function(e) {
+      new_tool_result(request, error = e)
+    }
+  )
+}
 ```
 
 
