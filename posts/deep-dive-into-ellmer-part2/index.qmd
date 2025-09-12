@@ -103,7 +103,7 @@ private$tools[[get_current_time@name]] <- get_current_time
 # chat$register_tool(get_current_time)
 ```
 
-Run a query with the `$chat()` method and our user prompt `"How long ago did Neil Armstrong touch down on the moon?"`
+From here on, we run a query with the `$chat()` method using our user prompt `"How long ago did Neil Armstrong touch down on the moon?"`
 ```{r}
 user_prompt <- "How long ago did Neil Armstrong touch down on the moon?"
 
@@ -151,25 +151,12 @@ function(provider, req) {
   }
 <environment: namespace:ellmer>
 ```
-In order to unpack the iterators within a [generator](https://coro.r-lib.org/articles/generator.html#generators), we  
-[iterate manually](https://coro.r-lib.org/articles/generator.html#iterating) with 
-```{r}
-coro::loop(for (x in response) {
-  print("Iteration------------------------------------------------------")
-  print(x)
-})
-```
-
-Alternatively, we can collect all values of iterator with `coro::collect()`:
+In order to unpack the iterators within a [generator](https://coro.r-lib.org/articles/generator.html#generators), 
+We can collect all values of iterator with `coro::collect()`:
 
 ```{r}
 all_chunks <- coro::collect(response)
 ```
-
-The OpenAI model responded with streaming response data:
-
-- Function: `get_current_time`
-- Arguments: `{"tz":"UTC"}`
 
 Then, we simplify the response with `stream_merge_chunks()`:
 ```{r}
@@ -190,7 +177,13 @@ Output related to tool call:
 [1] "{\"tz\":\"UTC\"}"
 ```
 
-Then, we create a `Turn` object for the assistant turn with `ContentToolRequest`, result, and tokens.
+The OpenAI/gpt-4.1 model responded with streaming response data:
+
+- Function: `get_current_time`
+- Arguments: `{"tz":"UTC"}`
+
+
+Then, we create a `Turn` object for the assistant turn:
 
 ```{r}
 turn <- value_turn(private$provider, result, has_type = !is.null(type))
@@ -201,9 +194,8 @@ Here, we insert our tool function (`get_current_time()`) in the `turn` object.
 turn <- match_tools(turn, private$tools)
 ```
 
- 
 
-So far, we have `user_turn` and `turn` (assistant turn):
+So far, we have `user_turn` (user turn) and `turn` (assistant turn):
 
 ```r
 > user_turn
@@ -214,7 +206,7 @@ How long ago did Neil Armstrong touch down on the moon?
 [tool request (call_0rAWkevHlh4ZXHdfQbob3Aw8)]: get_current_time(tz = "UTC")
 ```
 
-To recap, the user asked the assistant a question, "How long ago did Neil Armstrong touch down on the moon?" and the assistant responded with a tool request, asking the user to run the tool function.
+To recap, the user asked the assistant a question, "How long ago did Neil Armstrong touch down on the moon?" and the assistant responded with a tool request, asking the user to run the tool function, `get_current_time(tz = "UTC")`.
 
 We add these turns to the Chat object:
 ```{r}
@@ -244,7 +236,10 @@ tool_calls <- invoke_tools(
           )
 ```
 
-### invoke_tools()
+### Invoke tool
+
+The `invoke_tools()` function is a generator function that invokes all the tool requests in the assistant turn with the similar sounding `invoke_tool()` function. 
+
 ```{r}
 invoke_tools <- coro::generator(function(
     turn,
@@ -289,8 +284,8 @@ invoke_tools <- coro::generator(function(
   })
 ```
 
+Let's take a look at the `invoke_tool()`, which invokes each individual tool:
 
-`invoke_tool()`
 ```{r}
 invoke_tool <- function(request) {
   if (is.null(request@tool)) {
@@ -315,8 +310,9 @@ invoke_tool <- function(request) {
 }
 ```
 
+It takes a list of arguments for the tool function and uses `do.call()` to execute a function call. Then, it stores the result and the original request in a `ContentToolResult` object.
 
-`ContentToolRequest` and `ContentToolResult` are S7 classes used for tool-calling in ellmer. 
+Tangentially, `ContentToolRequest` and `ContentToolResult` are S7 classes used for tool-calling in ellmer. 
 
 `ContentToolRequest`
 
@@ -333,11 +329,11 @@ invoke_tool <- function(request) {
 - request: The `ContentToolRequest` associated with tool result.
 
 
-`request` is 
-```{r}
+The original `request` was
+```r
 > request
 <ellmer::ContentToolRequest>
- @ id       : chr "call_jv9iDOczMnwo773Ga6Y5BV9R"
+ @ id       : chr "[redacted]"
  @ name     : chr "get_current_time"
  @ arguments:List of 1
  .. $ tz: chr "UTC"
@@ -357,35 +353,35 @@ invoke_tool <- function(request) {
  .. @ annotations: list()
 ```
 
-Let's take a look at `invoke_tool()`:
+The result is:
 
-```{r}
-invoke_tool <- function(request) {
-  if (is.null(request@tool)) {
-    return(new_tool_result(request, error = "Unknown tool"))
-  }
-
-  args <- tool_request_args(request)
-  if (is_tool_result(args)) {
-    # Failed to convert the arguments
-    return(args)
-  }
-
-  tryCatch(
-    {
-      result <- do.call(request@tool, args)
-      # [1] "2025-09-07 01:20:06 UTC"
-      new_tool_result(request, result)
-      # <ellmer::ContentToolResult>
-    },
-    error = function(e) {
-      new_tool_result(request, error = e)
-    }
-  )
-}
+```r
+<ellmer::ContentToolResult>
+ @ value  : chr "2025-09-12 02:03:03 UTC"
+ @ error  : NULL
+ @ extra  : list()
+ @ request: <ellmer::ContentToolRequest>
+ .. @ id       : chr "call_r2el9wHpfQEmvBFw9kTKQGMP"
+ .. @ name     : chr "get_current_time"
+ .. @ arguments:List of 1
+ .. .. $ tz: chr "UTC"
+ .. @ tool     : <ellmer::ToolDef> function (tz = "UTC")  
+ .. .. @ name       : chr "get_current_time"
+ .. .. @ description: chr "Returns the current time."
+ .. .. @ arguments  : <ellmer::TypeObject>
+ .. .. .. @ description          : NULL
+ .. .. .. @ required             : logi TRUE
+ .. .. .. @ properties           :List of 1
+ .. .. .. .. $ tz: <ellmer::TypeBasic>
+ .. .. .. ..  ..@ description: chr "Time zone to display the current time in. Defaults to `\"UTC\"`."
+ .. .. .. ..  ..@ required   : logi FALSE
+ .. .. .. ..  ..@ type       : chr "string"
+ .. .. .. @ additional_properties: logi FALSE
+ .. .. @ convert    : logi TRUE
+ .. .. @ annotations: list()
 ```
 
-
+Finally, the output of `invoke_tools()` is a generator instance (created by calling a generator function):
 ```{r}
 > tool_calls
 <generator/instance>
@@ -432,6 +428,7 @@ function(
 <environment: namespace:ellmer>
 ```
 
+We loop through `tool_calls` and store our tool results in `tool_results`:
 
 ```{r}
 tool_results <- list()
@@ -454,7 +451,7 @@ The output of `tool_results`
  @ error  : NULL
  @ extra  : list()
  @ request: <ellmer::ContentToolRequest>
- .. @ id       : chr "call_0rAWkevHlh4ZXHdfQbob3Aw8"
+ .. @ id       : chr "[redacted]"
  .. @ name     : chr "get_current_time"
  .. @ arguments:List of 1
  .. .. $ tz: chr "UTC"
@@ -474,6 +471,7 @@ The output of `tool_results`
  .. .. @ annotations: list()
 ```
 
+We store the tool result in `user_turn` (user turn)
 
 ```{r}
 user_turn <- tool_results_as_turn(tool_results)
@@ -482,8 +480,10 @@ user_turn <- tool_results_as_turn(tool_results)
 Output of `user_turn`:
 ```{r}
 <Turn: user>
-[tool result  (call_0rAWkevHlh4ZXHdfQbob3Aw8)]: 2025-09-05 03:37:59 UTC
+[tool result  (call_[redacted])]: 2025-09-05 03:37:59 UTC
 ```
+
+After completion of the `while` loop, we go back to the top of the loop.
 
 Since `user_turn` is not `NULL`, we run `private$submit_turns()` again:
 ```{r}
