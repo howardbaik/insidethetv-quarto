@@ -31,7 +31,7 @@ The user asks the assistant a question, "What is the weather right now at Fenway
 
 ## Walkthrough of Tool-Calling
 
-In the rest of this blog post, we will examine the tool calling functionality within the `$chat()` method of the `Chat` object. We will draw an example from the [tool-calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html) in ellmer.
+In the rest of this blog post, we will examine the tool calling functionality within the `$chat()` method of the `Chat` object. We will draw an example from the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html) in ellmer.
 
 ### Setup
 
@@ -96,7 +96,7 @@ get_current_time <- tool(
 )
 ```
 
-Note that the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html#defining-a-tool-function) introduces a helper function that uses an LLM to generate this `tool()` call, `create_tool_def()`.
+Note that the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html#defining-a-tool-function) introduces a helper function that uses an LLM to generate this `tool()` call, `create_tool_def()`. This function may make mistakes, so the user must review the generated code. However, for more complicated functions, `create_tool_def()` is definitely a time-saver. 
 
 The final setup is to give our `chat` object access to our tool:
 ```{r}
@@ -105,7 +105,7 @@ private$tools[[get_current_time@name]] <- get_current_time
 
 ### `$chat()` method
 
-In this section, we walk through the source code that power the `$chat()` method (as it pertains to tool calling) with the prompt `"How long ago did Neil Armstrong touch down on the moon?"`:
+In this section, we walk through the source code that powers the `$chat()` method (as it pertains to tool calling) with the prompt `"How long ago did Neil Armstrong touch down on the moon?"`:
 ```{r}
 user_prompt <- "How long ago did Neil Armstrong touch down on the moon?"
 
@@ -115,9 +115,9 @@ echo <- check_echo(echo %||% private$echo)
 
 As shown in the diagram of ellmer's chat implementation in [Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#chat-implementation), the chat implementation method `$chat_impl()` leads to `$submit_turns()`, which then leads to `chat_perform()`. 
 
-To better understand the "whole game" of tool calling, I've created another diagram of tool calling functions in ellmer:
+To better understand the "whole game" of tool calling, I've created a diagram of tool calling functions in ellmer:
 
-[DIAGRAM]
+![Whole Game of Tool Calling](img/diagram.png)
 
 
 ```{r}
@@ -136,7 +136,7 @@ response <- chat_perform(
       )
 ```
 
-Calling `chat_perform()` results in a generator instance called `response` (created by calling a generator function):
+Calling `chat_perform()` results in a generator instance called `response`. A generator instance is created by calling a generator function:
 ```r
 > response
 <generator/instance>
@@ -163,7 +163,7 @@ coro::loop(for (x in response) {
 })
 ```
 
-Alternatively, we can collect all values of iterator with `coro::collect()`:
+Alternatively, we can collect all values of an iterator with `coro::collect()`:
 
 ```{r}
 all_chunks <- coro::collect(response)
@@ -194,13 +194,13 @@ Then, we create a `Turn` object for the assistant turn:
 turn <- value_turn(private$provider, result, has_type = !is.null(type))
 ```
 
-And we insert our tool function (`get_current_time()`) in the `turn` object. 
+And we insert our tool function (`get_current_time()`) in the `Turn` object. 
 ```{r}
 turn <- match_tools(turn, private$tools)
 ```
 
 
-So far, we have `user_turn` (user turn) and `turn` (assistant turn):
+So far, we have the following `user_turn` (user turn) and `turn` (assistant turn):
 
 ```r
 > user_turn
@@ -218,9 +218,9 @@ private$.turns[[length(private$.turns) + 1]] <- user_turn
 private$.turns[[length(private$.turns) + 1]] <- turn
 ```
 
-This concludes the `private$submit_turns()` method. To recap, the user asked the assistant a question, "How long ago did Neil Armstrong touch down on the moon?" and the assistant responded with a tool request, asking the user to run the tool function `get_current_time(tz = "UTC")`.
+This concludes the `private$submit_turns()` method. To recap, the user asked the assistant a question, `How long ago did Neil Armstrong touch down on the moon?` and the assistant responded with a tool request, asking the user to run the tool function `get_current_time(tz = "UTC")`.
 
-### invoke_tools()
+### Invoke tool
 
 Next, we invoke the tool since the assistant turn has a tool request:
 
@@ -241,57 +241,9 @@ tool_calls <- invoke_tools(
           )
 ```
 
-### Invoke tool
-
 The `invoke_tools()` function is a generator function that invokes all the tool requests in the assistant turn with the similar sounding `invoke_tool()` function. 
 
-```{r}
-invoke_tools <- coro::generator(function(
-    turn,
-    echo = "none",
-    on_tool_request = function(request) invisible(),
-    on_tool_result = function(result) invisible(),
-    yield_request = FALSE
-  ) {
-    tool_requests <- extract_tool_requests(turn)
-
-    for (request in tool_requests) {
-      maybe_echo_tool(request, echo = echo)
-      if (yield_request) {
-        yield(request)
-      }
-
-      rejected <- maybe_on_tool_request(request, on_tool_request)
-      if (!is.null(rejected)) {
-        maybe_echo_tool(rejected, echo = echo)
-        on_tool_result(rejected)
-        yield(rejected)
-        next
-      }
-
-      result <- invoke_tool(request)
-
-
-      if (promises::is.promise(result@value)) {
-        cli::cli_abort(
-          c(
-            "Can't use async tools with `$chat()` or `$stream()`.",
-            i = "Async tools are supported, but you must use `$chat_async()` or `$stream_async()`."
-          ),
-          class = "tool_async_error"
-        )
-      }
-
-      maybe_echo_tool(result, echo = echo)
-      on_tool_result(result)
-      yield(result)
-    }
-  })
-```
-
-Let's take a look at the `invoke_tool()`, which invokes each individual tool:
-The `invoke_tools()` function loops through each tool request and calls the `invoke_tool()` function on each tool request. 
-
+Let's take a look at the `invoke_tool()` function, which invokes each individual tool:
 ```{r}
 invoke_tool <- function(request) {
   if (is.null(request@tool)) {
@@ -318,28 +270,28 @@ invoke_tool <- function(request) {
 
 It takes a list of arguments for the tool function and uses `do.call()` to execute a function call. Then, it stores the result and the original request in a `ContentToolResult` object.
 
-Tangentially, `ContentToolRequest` and `ContentToolResult` are S7 classes used for tool-calling in ellmer. 
+Tool calling in ellmer invovles two S7 classes, `ContentToolRequest` for tool requests and `ContentToolResult` for tool results.
 
-`ContentToolRequest`
+Properties of `ContentToolRequest`:
 
-- id: Tool call id
-- name: Name of tool function
-- arguments: Arguments to call function
-- tool: Tool metadata
+- `id`: Tool call id
+- `name`: Name of tool function
+- `arguments`: Arguments to call function
+- `tool`: Tool metadata
 
-`ContentToolResult`
+Properties of `ContentToolResult`:
 
-- value: The result of calling tool function
-- error: Error message when calling tool function and it throws an error
-- extra: Optional additional data
-- request: The `ContentToolRequest` associated with tool result.
+- `value`: The result of calling tool function
+- `error`: Error message when calling tool function and it throws an error
+- `extra`: Optional additional data
+- `request`: The `ContentToolRequest` associated with tool result.
 
 
-The original `request` was
+The `request`, a `ContentToolRequest` object, looks like:
 ```r
 > request
 <ellmer::ContentToolRequest>
- @ id       : chr "[redacted]"
+ @ id       : chr "[call_0rAWkevHlh4ZXHdfQbob3Aw8]"
  @ name     : chr "get_current_time"
  @ arguments:List of 1
  .. $ tz: chr "UTC"
@@ -359,7 +311,7 @@ The original `request` was
  .. @ annotations: list()
 ```
 
-The result is:
+The result, a `ContentToolResult` object, looks like:
 
 ```r
 <ellmer::ContentToolResult>
@@ -387,52 +339,7 @@ The result is:
  .. .. @ annotations: list()
 ```
 
-Finally, the output of `invoke_tools()` is a generator instance (created by calling a generator function):
-```{r}
-> tool_calls
-<generator/instance>
-function(
-    turn,
-    echo = "none",
-    on_tool_request = function(request) invisible(),
-    on_tool_result = function(result) invisible(),
-    yield_request = FALSE
-  ) {
-    tool_requests <- extract_tool_requests(turn)
-
-    for (request in tool_requests) {
-      maybe_echo_tool(request, echo = echo)
-      if (yield_request) {
-        yield(request)
-      }
-
-      rejected <- maybe_on_tool_request(request, on_tool_request)
-      if (!is.null(rejected)) {
-        maybe_echo_tool(rejected, echo = echo)
-        on_tool_result(rejected)
-        yield(rejected)
-        next
-      }
-
-      result <- invoke_tool(request)
-
-      if (promises::is.promise(result@value)) {
-        cli::cli_abort(
-          c(
-            "Can't use async tools with `$chat()` or `$stream()`.",
-            i = "Async tools are supported, but you must use `$chat_async()` or `$stream_async()`."
-          ),
-          class = "tool_async_error"
-        )
-      }
-
-      maybe_echo_tool(result, echo = echo)
-      on_tool_result(result)
-      yield(result)
-    }
-  }
-<environment: namespace:ellmer>
-```
+Finally, the output of `invoke_tools()` is a generator instance and is created by calling a generator function.
 
 We loop through `tool_calls` and store our tool results in `tool_results`:
 
@@ -440,7 +347,6 @@ We loop through `tool_calls` and store our tool results in `tool_results`:
 tool_results <- list()
 
 coro::loop(for (tool_step in tool_calls) {
-  print("Iteration------------------------------------------------------")
     if (is_tool_result(tool_step)) {
       tool_results <- c(tool_results, list(tool_step))
     }
@@ -457,7 +363,7 @@ The output of `tool_results`
  @ error  : NULL
  @ extra  : list()
  @ request: <ellmer::ContentToolRequest>
- .. @ id       : chr "[redacted]"
+ .. @ id       : chr "call_0rAWkevHlh4ZXHdfQbob3Aw8"
  .. @ name     : chr "get_current_time"
  .. @ arguments:List of 1
  .. .. $ tz: chr "UTC"
@@ -477,44 +383,27 @@ The output of `tool_results`
  .. .. @ annotations: list()
 ```
 
-We store the tool result in `user_turn` (user turn)
+Next, we store the tool result in `user_turn` (user turn)
 
 ```{r}
 user_turn <- tool_results_as_turn(tool_results)
 ```
 
-Output of `user_turn`:
+Output of `user_turn` shows the tool result:
 ```{r}
 <Turn: user>
-[tool result  (call_[redacted])]: 2025-09-05 03:37:59 UTC
+[tool result  (call_0rAWkevHlh4ZXHdfQbob3Aw8)]: 2025-09-05 03:37:59 UTC
 ```
 
-After completion of the `while` loop, we go back to the top of the loop.
+After completion of the `while` loop, we go back to the top of the loop. Since `user_turn` is not `NULL`, we run `private$submit_turns()` again.
 
-Since `user_turn` is not `NULL`, we run `private$submit_turns()` again:
-```{r}
-response <- chat_perform(
-  provider = private$provider,
-  mode = if (stream) "stream" else "value",
-  turns = c(private$.turns, list(user_turn)),
-  tools = if (is.null(type)) private$tools,
-  type = type
-  )
-
-result <- NULL
-for (chunk in all_chunks) {
-  result <- stream_merge_chunks(private$provider, result, chunk)
-}  
-```
-
-The content of the `result` is:
+The content of the `result`, which is the assistant's response, is the following:
 ```r
 $choices[[1]]$delta$content
 [1] "Neil Armstrong touched down on the moon on July 20, 1969. As of today (September 6, 2025), it has been 56 years, 1 month, and 17 days since Neil Armstrong first set foot on the lunar surface."
 ```
 
 And we insert the result and provider into `turn`, for assistant turn:
-
 
 ```{r}
 turn <- value_turn(private$provider, result, has_type = !is.null(type))
@@ -540,13 +429,15 @@ This concludes `private$submit_turns()`
 
 ```{r}
 assistant_turn <- self$last_turn()
-user_turn <- NULL
+user_turn <- NULL # Important
 ```
 
-Since `turn_has_tool_request(assistant_turn)` is `FALSE`, that completes the while loop. We go to the top of the while loop, and exit out since `user_turn` is `NULL`.
-
-This concludes `private$chat_impl()`, and hence completes the `$chat()` method.
-Since `turn_has_tool_request(assistant_turn)` is `FALSE`, that concludes `private$chat_impl()`.
-
+Since `turn_has_tool_request(assistant_turn)` is `FALSE`, that completes the `while` loop. We go back to the top of the `while` loop, and exit out since `user_turn` is `NULL`. This concludes `private$chat_impl()`, and hence completes the `$chat()` method.
 
 ## Conclusion
+
+In this blog post, we took a closer look at tool calling in ellmer. We traced through the source code of the `$chat()` method. Simply, it sends a question along with a tool to the assistant, the assistant responds with a tool request, the user calls the tool and then submits the tool result to the assistant, and finally the assistant responds with its final answer. More on other cool capabilities of ellmer, such as structured data, in the next blog post. 
+
+Thanks for reading.
+
+
