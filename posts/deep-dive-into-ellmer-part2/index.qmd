@@ -218,7 +218,7 @@ private$.turns[[length(private$.turns) + 1]] <- user_turn
 private$.turns[[length(private$.turns) + 1]] <- turn
 ```
 
-This concludes the `private$submit_turns()` method. To recap, the user asked the assistant a question, `How long ago did Neil Armstrong touch down on the moon?` and the assistant responded with a tool request, asking the user to run the tool function `get_current_time(tz = "UTC")`.
+This concludes the `private$submit_turns()` method. To recap, the user asked the assistant a question, `How long ago did Neil Armstrong touch down on the moon?` and the assistant responded with a tool request, asking the user to invoke the tool function `get_current_time(tz = "UTC")`.
 
 ### Invoke tool
 
@@ -436,7 +436,9 @@ Since `turn_has_tool_request(assistant_turn)` is `FALSE`, that completes the `wh
 
 ## Conclusion
 
-In this blog post, we took a closer look at tool calling in ellmer. We traced through the source code of the `$chat()` method. Simply, it sends a question along with a tool to the assistant, the assistant responds with a tool request, the user calls the tool and then submits the tool result to the assistant, and finally the assistant responds with its final answer. More on other cool capabilities of ellmer, such as structured data, in the next blog post. 
+In this blog post, we took a closer look at tool calling in ellmer. We traced through the source code of the `$chat()` method to understand the mechanics of tool calling. The tool calling workflow is as follows: user sends a question along with a tool to the assistant, the assistant responds with a tool request, the user calls the tool and then submits the tool result to the assistant, and finally the assistant responds with its final answer.
+
+More on other cool capabilities of ellmer, such as structured data, in the next blog post. 
 
 Thanks for reading.
 
