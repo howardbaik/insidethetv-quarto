@@ -2,7 +2,7 @@
 title: "Deep Dive into ellmer: Part 2"
 description: "I parsed through the source code of ellmer so you don't have to"
 author: "Howard Baik"
-date: "2025-09-12"
+date: "2025-09-16"
 categories: [ellmer]
 image: "thumbnail.png"
 execute:
@@ -31,11 +31,11 @@ The user asks the assistant a question, "What is the weather right now at Fenway
 
 ## Walkthrough of Tool-Calling
 
-In the rest of this blog post, we will examine the tool calling functionality within the `$chat()` method of the `Chat` object. We will draw an example from the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html) in ellmer.
+In the rest of this blog post, we will examine the tool calling functionality within the `$chat()` method of the `Chat` object. We will draw an example from the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html){target="_blank"} in ellmer.
 
 ### Setup
 
-First, we initialize the `chat` object: `chat <- chat_openai()`. We will use OpenAI's GPT 4.1 model. I will skip the details, as they were covered with great detail in [Deep Dive into ellmer: Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#setup).
+First, we initialize the `chat` object: `chat <- chat_openai()`. We will use OpenAI's GPT 4.1 model. I will skip the details, as they were covered with great detail in [Deep Dive into ellmer: Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#setup){target="_blank"}.
 ```{r}
 # Arguments to chat_openai()
 system_prompt = NULL
@@ -96,7 +96,7 @@ get_current_time <- tool(
 )
 ```
 
-Note that the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html#defining-a-tool-function) introduces a helper function that uses an LLM to generate this `tool()` call, `create_tool_def()`. This function may make mistakes, so the user must review the generated code. However, for more complicated functions, `create_tool_def()` is definitely a time-saver. 
+Note that the [tool calling vignette](https://ellmer.tidyverse.org/articles/tool-calling.html#defining-a-tool-function){target="_blank"} introduces a helper function that uses an LLM to generate this `tool()` call, `create_tool_def()`. This function may make mistakes, so the user must review the generated code. However, for more complicated functions, `create_tool_def()` is definitely a time-saver. 
 
 The final setup is to give our `chat` object access to our tool:
 ```{r}
@@ -113,7 +113,7 @@ turn <- user_turn(user_prompt)
 echo <- check_echo(echo %||% private$echo)
 ```
 
-As shown in the diagram of ellmer's chat implementation in [Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#chat-implementation), the chat implementation method `$chat_impl()` leads to `$submit_turns()`, which then leads to `chat_perform()`. 
+As shown in the diagram of ellmer's chat implementation in [Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#chat-implementation){target="_blank"}, the chat implementation method `$chat_impl()` leads to `$submit_turns()`, which then leads to `chat_perform()`. 
 
 To better understand the "whole game" of tool calling, I've created a diagram of tool calling functions in ellmer:
 
@@ -156,7 +156,7 @@ function(provider, req) {
   }
 <environment: namespace:ellmer>
 ```
-In order to unpack the iterators within a [generator](https://coro.r-lib.org/articles/generator.html#generators), we can [iterate manually](https://coro.r-lib.org/articles/generator.html#iterating) with 
+In order to unpack the iterators within a [generator](https://coro.r-lib.org/articles/generator.html#generators){target="_blank"}, we can [iterate manually](https://coro.r-lib.org/articles/generator.html#iterating){target="_blank"} with 
 ```{r}
 coro::loop(for (x in response) {
   print(x)
