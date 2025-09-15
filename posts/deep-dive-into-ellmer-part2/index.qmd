@@ -19,6 +19,8 @@ Note that the ellmer R package is currently at version `0.3.0`, indicating it is
 
 ```{r}
 library(ellmer)
+# > packageVersion("ellmer")
+# [1] ‘0.3.0’
 ```
 
 Part 2 takes a deep dive into tool calling. Tool calling provides LLM with tools it can call. A tool is like a function and is defined by the function name, description, and a list of arguments. As Joe Cheng shares in his ["Demystifying LLMs with Ellmer" talk](https://youtu.be/skLmOuNjqEU?si=BeBGMQE4FJdpTiIH){target="_blank"}, think of an LLM as a brain in a jar. It does not have any ability other than the questions you ask it. Tool calling equips this brain with the ability to interact with other systems.
