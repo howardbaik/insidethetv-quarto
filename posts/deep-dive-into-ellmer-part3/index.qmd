@@ -81,6 +81,7 @@ In this section, we walk through the source code that powers the `$chat_structur
 # Arguments to $chat_structured()
 user_prompt <- "My name is Howard and I'm an R programmer"
 
+# Type specification
 type <- type_object(
     name = type_string(),
     programming_language = type_string(),
@@ -94,20 +95,110 @@ convert = TRUE
 
 `type_needs_wrapper()` checks if we're using an OpenAI provider and the type is something other than `TypeObject` or `TypeJsonSchema`. In our case, `needs_wrapper = FALSE` since our type is a `TypeObject`. 
 
-# `$submit_turns()` 
+```{r}
+turn <- user_turn(user_prompt, .check_empty = FALSE)
+echo <- check_echo(echo %||% private$echo)
+check_bool(convert)
+
+needs_wrapper <- type_needs_wrapper(type, private$provider)
+type <- wrap_type_if_needed(type, needs_wrapper)
+```
 
 
+### `$submit_turns()` 
+
+```{r}
+# Setup for `chat_perform()`
+stream <- echo != "none"
+user_turn <- turn
+
+# chat_perform()
+response <- chat_perform(
+  provider = private$provider,
+  mode = if (stream) "stream" else "value",
+  turns = c(private$.turns, list(user_turn)),
+  tools = if (is.null(type)) private$tools,
+  type = type
+)
+```
+
+`response`:
+```r
+$choices[[1]]$message
+$choices[[1]]$message$role
+[1] "assistant"
+
+$choices[[1]]$message$content
+[1] "{\"name\":\"Howard\",\"programming_language\":\"R\",\"job\":\"R programmer\"}"
+```
+
+Given this `response` object, we run
+
+```{r}
+has_type = TRUE
+
+turn <- value_turn(
+    private$provider,
+    response,
+    has_type = !is.null(type)
+  )
+```
+
+which creates a list of `ContentJson` ellmer object:
+
+```r
+> content
+[[1]]
+<ellmer::ContentJson>
+ @ value:List of 3
+ .. $ name                : chr "Howard"
+ .. $ programming_language: chr "R"
+ .. $ job                 : chr "R programmer"
+```
+and puts this `content`, `result`, and `tokens` in an assistant turn:
+
+```r
+<Turn: assistant>
+[data] {
+  "name": "Howard",
+  "programming_language": "R",
+  "job": "R programmer"
+}
+```
+
+and finally `self$add_turn(user_turn, turn)`, which adds the user turn (`user_turn`) and assistant turn (`turn`). 
+
+```{r}
+private$.turns[[length(private$.turns) + 1]] <- user
+private$.turns[[length(private$.turns) + 1]] <- system
+```
 
 
+### `extract_data()`
+
+Now that we have the respone for structured data, we extract out the data. 
+
+```{r}
+extract_data(turn, type, convert = convert, needs_wrapper = needs_wrapper)
+```
 
 
-# `extract_data()`
+```r
+$name
+[1] "Howard"
 
+$programming_language
+[1] "R"
 
+$job
+[1] "R programmer"
+```
 
 
 ## Conclusion
 
 In this blog post, we took a closer look at structured data in ellmer. We traced through the source code of the `$chat_structured()` method to understand the mechanics of extracting structured output from user input. 
+
+This concludes the Deep Dive into ellmer blog series. 
 
 Thanks for reading.
