@@ -2,7 +2,7 @@
 title: "Deep Dive into ellmer: Part 3"
 description: "Structured output"
 author: "Howard Baik"
-date: "2025-09-28"
+date: "2025-09-25"
 categories: [ellmer]
 image: "thumbnail.png"
 execute:
@@ -70,7 +70,7 @@ echo = "none"
 convert = TRUE
 ```
 
-`type_needs_wrapper()` checks if we're using an OpenAI provider and `type` is something other than `TypeObject` or `TypeJsonSchema`. In our case, `needs_wrapper = FALSE` since `type` is a `TypeObject`. 
+`type_needs_wrapper()` checks if we're using an OpenAI provider and if `type` is something other than `TypeObject` or `TypeJsonSchema`. In our case, `needs_wrapper = FALSE` since `type` is a `TypeObject`. 
 
 ```{r}
 turn <- user_turn(user_prompt, .check_empty = FALSE)
