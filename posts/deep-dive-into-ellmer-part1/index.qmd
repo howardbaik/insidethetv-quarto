@@ -1,6 +1,6 @@
 ---
 title: "Deep Dive into ellmer: Part 1"
-description: "I parsed through the source code of ellmer so you don't have to"
+description: "chat_google_gemini() function"
 author: "Howard Baik"
 date: "2025-08-04"
 categories: [ellmer]

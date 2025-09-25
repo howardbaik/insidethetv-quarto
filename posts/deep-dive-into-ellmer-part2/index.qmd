@@ -1,6 +1,6 @@
 ---
 title: "Deep Dive into ellmer: Part 2"
-description: "I parsed through the source code of ellmer so you don't have to"
+description: "Tool calling"
 author: "Howard Baik"
 date: "2025-09-16"
 categories: [ellmer]
