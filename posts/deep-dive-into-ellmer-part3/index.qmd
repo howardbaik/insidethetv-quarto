@@ -27,7 +27,7 @@ Part 3 takes a deep dive into structured data (aka structured output). According
 
 ![LangChain's Diagram of Structured Output](img/structured-output.png)
 
-You supply the type specification that defines the object structure you want and the LLM ensures that’s what you’ll get back. We supply the type specification with the following functions in R:
+You supply the type specification that defines the object structure you want and the LLM ensures that’s what you’ll get back. In R, we define the type specification using the following functions:
 
 -  `type_boolean()` for logicals
 -  `type_integer()` for integers 
@@ -84,7 +84,7 @@ type <- wrap_type_if_needed(type, needs_wrapper)
 
 ### `$submit_turns()` method
 
-Then, we run the `chat_perform()` function to perform a POST API request, which includes the type specification in the body, and get a response.
+Then, we run `chat_perform()` to perform a POST API request, which includes the type specification in the body, and get an API response.
 
 ```{r}
 # Setup for `chat_perform()`
