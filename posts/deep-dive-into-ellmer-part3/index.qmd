@@ -35,7 +35,7 @@ You supply the type specification that defines the object structure you want and
 - `type_string()` for characters
 - `type_enum()` for factors
 - `type_array()` for vectors
--  `type_object()` for named lists. 
+-  `type_object()` for named lists
 - There is no specific type for dates, but you can use `type_string()` and specify the date format you want: `type_string("The creation date, in YYYY-MM-DD format.")`. 
 
 All these functions take the `description` parameter, which describes the purpose of the type specification. This is used by the LLM to determine what values to extract in the structured data. 
