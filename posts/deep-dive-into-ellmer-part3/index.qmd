@@ -23,55 +23,33 @@ library(ellmer)
 # [1] ‘0.3.0’
 ```
 
-Part 3 takes a deep dive into structured data (aka structured output). According to [LangChain](https://python.langchain.com/docs/concepts/structured_outputs/), the concept of structured data is that models can be instructed to respond with a particular output structure.
+Part 3 takes a deep dive into structured data (aka structured output). According to [LangChain](https://python.langchain.com/docs/concepts/structured_outputs/), structured outputs refer to the ability to direct language models to generate responses that conform to a specific predefined format or schema.
 
 ![LangChain's Diagram of Structured Output](img/structured-output.png)
 
-With structured data, you supply the type specification that defines the object structure you want and the LLM ensures that’s what you’ll get back. We supply the type specification with the following functions with the corresponding type in R: `type_boolean()` for logicals, `type_integer()` for integers, `type_number()` for doubles, `type_string()` for characters, `type_enum()` for factors, `type_array()` for vectors, and `type_object()` for named lists. All these functions take the `description` parameter, which describes the purpose of the type specification. This is used by the LLM to determine what values to extract in the structured data. By the way, there is no specific type for dates, but you can use `type_string()` and specify the date format you want: `type_string("The creation date, in YYYY-MM-DD format.")`.
+You supply the type specification that defines the object structure you want and the LLM ensures that’s what you’ll get back. We supply the type specification with the following functions in R:
+
+-  `type_boolean()` for logicals
+-  `type_integer()` for integers 
+- `type_number()` for doubles
+- `type_string()` for characters
+- `type_enum()` for factors
+- `type_array()` for vectors
+-  `type_object()` for named lists. 
+- There is no specific type for dates, but you can use `type_string()` and specify the date format you want: `type_string("The creation date, in YYYY-MM-DD format.")`. 
+
+All these functions take the `description` parameter, which describes the purpose of the type specification. This is used by the LLM to determine what values to extract in the structured data. 
 
 
 ## Walkthrough of Structured Data
 
-In the rest of this blog post, we will examine structured data in ellmer in the `$chat_structured()` method of the `Chat` object.
+In the rest of this blog post, we will extract structured data using the `$chat_structured()` method of the `Chat` object in ellmer.
+
+![Diagram of Structured Output in ellmer](img/diagram.png)
 
 ### Setup
 
 First, we initialize the `chat` object: `chat <- chat_openai()`. We will use OpenAI's GPT 4.1 model. I will skip the details, as they were covered with great detail in [Deep Dive into ellmer: Part 1](https://www.howardbaik.com/posts/deep-dive-into-ellmer-part1/#setup){target="_blank"}.
-
-```{r}
-# Arguments to chat_openai()
-system_prompt = NULL
-base_url = Sys.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
-api_key = openai_key()
-model = NULL
-params = NULL
-api_args = list()
-api_headers = character()
-echo = "output"
-
-# Code inside chat_openai()
-model <- set_default(model, "gpt-4.1")
-echo <- check_echo(echo)
-params <- params %||% params()
-
-provider <- ProviderOpenAI(
-  name = "OpenAI",
-  base_url = base_url,
-  model = model,
-  params = params,
-  extra_args = api_args,
-  extra_headers = api_headers,
-  api_key = api_key
-)
-
-# Initialize chat object
-chat <- Chat$new(provider = provider, system_prompt = system_prompt, echo = echo)
-
-# Needed for later calls
-private <- list()
-private$provider <- provider
-```
-
 
 ### `$chat_structured()` method
 
@@ -83,17 +61,16 @@ user_prompt <- "My name is Howard and I'm an R programmer"
 
 # Type specification
 type <- type_object(
-    name = type_string(),
-    programming_language = type_string(),
-    job = type_string()
-    )
+  name = type_string(),
+  programming_language = type_string(),
+  job = type_string()
+)
 
 echo = "none"
 convert = TRUE
 ```
 
-
-`type_needs_wrapper()` checks if we're using an OpenAI provider and the type is something other than `TypeObject` or `TypeJsonSchema`. In our case, `needs_wrapper = FALSE` since our type is a `TypeObject`. 
+`type_needs_wrapper()` checks if we're using an OpenAI provider and `type` is something other than `TypeObject` or `TypeJsonSchema`. In our case, `needs_wrapper = FALSE` since `type` is a `TypeObject`. 
 
 ```{r}
 turn <- user_turn(user_prompt, .check_empty = FALSE)
@@ -105,7 +82,9 @@ type <- wrap_type_if_needed(type, needs_wrapper)
 ```
 
 
-### `$submit_turns()` 
+### `$submit_turns()` method
+
+Then, we run the `chat_perform()` function to perform a POST API request, which includes the type specification in the body, and get a response.
 
 ```{r}
 # Setup for `chat_perform()`
@@ -122,7 +101,7 @@ response <- chat_perform(
 )
 ```
 
-`response`:
+The `response` is as following:
 ```r
 $choices[[1]]$message
 $choices[[1]]$message$role
@@ -132,19 +111,19 @@ $choices[[1]]$message$content
 [1] "{\"name\":\"Howard\",\"programming_language\":\"R\",\"job\":\"R programmer\"}"
 ```
 
-Given this `response` object, we run
+Given this `response`, we run
 
 ```{r}
 has_type = TRUE
 
 turn <- value_turn(
-    private$provider,
-    response,
-    has_type = !is.null(type)
-  )
+  private$provider,
+  response,
+  has_type = !is.null(type)
+)
 ```
 
-which creates a list of `ContentJson` ellmer object:
+which creates a list of `ContentJson` ellmer object(s):
 
 ```r
 > content
@@ -166,7 +145,7 @@ and puts this `content`, `result`, and `tokens` in an assistant turn:
 }
 ```
 
-and finally `self$add_turn(user_turn, turn)`, which adds the user turn (`user_turn`) and assistant turn (`turn`). 
+Finally, `self$add_turn(user_turn, turn)` adds the user turn (`user_turn`) and assistant turn (`turn`):
 
 ```{r}
 private$.turns[[length(private$.turns) + 1]] <- user
@@ -176,13 +155,14 @@ private$.turns[[length(private$.turns) + 1]] <- system
 
 ### `extract_data()`
 
-Now that we have the respone for structured data, we extract out the data. 
+Finally, now that we have the response for structured data, we extract out the data:
 
 ```{r}
 extract_data(turn, type, convert = convert, needs_wrapper = needs_wrapper)
 ```
 
 
+Final output:
 ```r
 $name
 [1] "Howard"
@@ -193,6 +173,8 @@ $programming_language
 $job
 [1] "R programmer"
 ```
+
+We correctly get the name, the programming language, and the job from the user prompt. 
 
 
 ## Conclusion
