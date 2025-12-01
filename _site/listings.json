@@ -1,9 +1,5 @@
 [
   {
-    "listing": "/projects.html",
-    "items": []
-  },
-  {
     "listing": "/blog.html",
     "items": [
       "/posts/deep-dive-into-ellmer-part3/index.html",
@@ -23,5 +19,9 @@
       "/posts/are-teams-getting-lucky-on-rushes/index.html",
       "/posts/wine-quality-prediction/index.html"
     ]
+  },
+  {
+    "listing": "/projects.html",
+    "items": []
   }
 ]

@@ -7,7 +7,10 @@ website:
   favicon: favicon.png
   navbar:
     right:
-      - blog.qmd
+      - text: "R Blog"
+        href: blog.qmd
+      - text: "PyTorch Blog"
+        href: https://passthetorch.dev/
       - projects.qmd
       - icon: github
         href: https://github.com/howardbaik
