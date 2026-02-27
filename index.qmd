@@ -13,7 +13,7 @@ about:
       href: https://github.com/howardbaik
 ---
 
-Howard Baik (he/him) is a Data/Solution Engineer at Integral Consulting Inc.
+Howard Baik is a Data/Solution Engineer at Integral Consulting Inc.
 
 📬 Contact: howardbaik43\@gmail.com
 
