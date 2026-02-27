@@ -4,7 +4,6 @@ description: "Structured output"
 author: "Howard Baik"
 date: "2025-09-25"
 categories: [ellmer]
-
 execute:
   eval: false
 ---
